@@ -104,6 +104,16 @@ var rlSetTexture func(id uint32)
 var rlLoadVertexArray func() uint32
 var rlUnloadVertexBuffer func(vboId uint32)
 var rlSetVertexAttributeDivisor func(index uint32, divisor int32)
+var rlLoadVertexBuffer func(buffer unsafe.Pointer, size int32, dynamic bool) uint32
+var rlLoadVertexBufferElement func(buffer unsafe.Pointer, size int32, dynamic bool) uint32
+var rlUpdateVertexBuffer func(bufferId uint32, data unsafe.Pointer, dataSize int32, offset int32)
+var rlUpdateVertexBufferElements func(id uint32, data unsafe.Pointer, dataSize int32, offset int32)
+var rlSetVertexAttribute func(index uint32, compSize int32, attrType int32, normalized bool, stride int32, offset int32)
+var rlSetVertexAttributeDefault func(locIndex int32, value unsafe.Pointer, attribType int32, count int32)
+var rlDrawVertexArray func(offset int32, count int32)
+var rlDrawVertexArrayElements func(offset int32, count int32, buffer unsafe.Pointer)
+var rlDrawVertexArrayInstanced func(offset int32, count int32, instances int32)
+var rlDrawVertexArrayElementsInstanced func(offset int32, count int32, buffer unsafe.Pointer, instances int32)
 var rlLoadTextureDepth func(width int32, height int32, useRenderBuffer bool) uint32
 var rlLoadFramebuffer func() uint32
 var rlFramebufferAttach func(fboId uint32, texId uint32, attachType int32, texType int32, mipLevel int32)
@@ -237,6 +247,16 @@ func initRlglPurego() {
 	purego.RegisterLibFunc(&rlLoadVertexArray, raylibDll, "rlLoadVertexArray")
 	purego.RegisterLibFunc(&rlUnloadVertexBuffer, raylibDll, "rlUnloadVertexBuffer")
 	purego.RegisterLibFunc(&rlSetVertexAttributeDivisor, raylibDll, "rlSetVertexAttributeDivisor")
+	purego.RegisterLibFunc(&rlLoadVertexBuffer, raylibDll, "rlLoadVertexBuffer")
+	purego.RegisterLibFunc(&rlLoadVertexBufferElement, raylibDll, "rlLoadVertexBufferElement")
+	purego.RegisterLibFunc(&rlUpdateVertexBuffer, raylibDll, "rlUpdateVertexBuffer")
+	purego.RegisterLibFunc(&rlUpdateVertexBufferElements, raylibDll, "rlUpdateVertexBufferElements")
+	purego.RegisterLibFunc(&rlSetVertexAttribute, raylibDll, "rlSetVertexAttribute")
+	purego.RegisterLibFunc(&rlSetVertexAttributeDefault, raylibDll, "rlSetVertexAttributeDefault")
+	purego.RegisterLibFunc(&rlDrawVertexArray, raylibDll, "rlDrawVertexArray")
+	purego.RegisterLibFunc(&rlDrawVertexArrayElements, raylibDll, "rlDrawVertexArrayElements")
+	purego.RegisterLibFunc(&rlDrawVertexArrayInstanced, raylibDll, "rlDrawVertexArrayInstanced")
+	purego.RegisterLibFunc(&rlDrawVertexArrayElementsInstanced, raylibDll, "rlDrawVertexArrayElementsInstanced")
 	purego.RegisterLibFunc(&rlLoadTextureDepth, raylibDll, "rlLoadTextureDepth")
 	purego.RegisterLibFunc(&rlLoadFramebuffer, raylibDll, "rlLoadFramebuffer")
 	purego.RegisterLibFunc(&rlFramebufferAttach, raylibDll, "rlFramebufferAttach")
@@ -761,6 +781,56 @@ func UnloadVertexBuffer(vboId uint32) {
 // SetVertexAttributeDivisor .
 func SetVertexAttributeDivisor(index uint32, divisor int32) {
 	rlSetVertexAttributeDivisor(index, divisor)
+}
+
+// LoadVertexBuffer - Load a vertex buffer object
+func LoadVertexBuffer(buffer unsafe.Pointer, size int32, dynamic bool) uint32 {
+	return rlLoadVertexBuffer(buffer, size, dynamic)
+}
+
+// LoadVertexBufferElement - Load vertex buffer elements object
+func LoadVertexBufferElement(buffer unsafe.Pointer, size int32, dynamic bool) uint32 {
+	return rlLoadVertexBufferElement(buffer, size, dynamic)
+}
+
+// UpdateVertexBuffer - Update vertex buffer object data on GPU buffer
+func UpdateVertexBuffer(bufferId uint32, data unsafe.Pointer, dataSize int32, offset int32) {
+	rlUpdateVertexBuffer(bufferId, data, dataSize, offset)
+}
+
+// UpdateVertexBufferElements - Update vertex buffer elements data on GPU buffer
+func UpdateVertexBufferElements(id uint32, data unsafe.Pointer, dataSize int32, offset int32) {
+	rlUpdateVertexBufferElements(id, data, dataSize, offset)
+}
+
+// SetVertexAttribute - Set vertex attribute data configuration
+func SetVertexAttribute(index uint32, compSize int32, attrType int32, normalized bool, stride int32, offset int32) {
+	rlSetVertexAttribute(index, compSize, attrType, normalized, stride, offset)
+}
+
+// SetVertexAttributeDefault - Set vertex attribute default value
+func SetVertexAttributeDefault(locIndex int32, value unsafe.Pointer, attribType int32, count int32) {
+	rlSetVertexAttributeDefault(locIndex, value, attribType, count)
+}
+
+// DrawVertexArray - Draw vertex array (currently active vao)
+func DrawVertexArray(offset int32, count int32) {
+	rlDrawVertexArray(offset, count)
+}
+
+// DrawVertexArrayElements - Draw vertex array elements
+func DrawVertexArrayElements(offset int32, count int32, buffer unsafe.Pointer) {
+	rlDrawVertexArrayElements(offset, count, buffer)
+}
+
+// DrawVertexArrayInstanced - Draw vertex array (currently active vao) with instancing
+func DrawVertexArrayInstanced(offset int32, count int32, instances int32) {
+	rlDrawVertexArrayInstanced(offset, count, instances)
+}
+
+// DrawVertexArrayElementsInstanced - Draw vertex array elements with instancing
+func DrawVertexArrayElementsInstanced(offset int32, count int32, buffer unsafe.Pointer, instances int32) {
+	rlDrawVertexArrayElementsInstanced(offset, count, buffer, instances)
 }
 
 // LoadTextureDepth - Load depth texture/renderbuffer (to be attached to fbo)
