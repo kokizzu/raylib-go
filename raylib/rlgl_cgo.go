@@ -621,35 +621,51 @@ func SetVertexAttributeDivisor(index uint32, divisor int32) {
 }
 
 // LoadVertexBuffer - Load a vertex buffer object
-func LoadVertexBuffer(buffer unsafe.Pointer, size int32, dynamic bool) uint32 {
-	cbuffer := buffer
-	csize := C.int(size)
+func LoadVertexBuffer[T any](buffer []T, dynamic bool) uint32 {
+	if len(buffer) == 0 {
+		return 0
+	}
+	var z T
+	cbuffer := unsafe.Pointer(&buffer[0])
+	csize := C.int(int(unsafe.Sizeof(z)) * len(buffer))
 	cdynamic := C.bool(dynamic)
 	return uint32(C.rlLoadVertexBuffer(cbuffer, csize, cdynamic))
 }
 
-// LoadVertexBufferElement - Load vertex buffer elements object
-func LoadVertexBufferElement(buffer unsafe.Pointer, size int32, dynamic bool) uint32 {
-	cbuffer := buffer
-	csize := C.int(size)
+// LoadVertexBufferElements - Load vertex buffer elements object
+func LoadVertexBufferElements[T any](buffer []T, dynamic bool) uint32 {
+	if len(buffer) == 0 {
+		return 0
+	}
+	var z T
+	cbuffer := unsafe.Pointer(&buffer[0])
+	csize := C.int(int(unsafe.Sizeof(z)) * len(buffer))
 	cdynamic := C.bool(dynamic)
 	return uint32(C.rlLoadVertexBufferElement(cbuffer, csize, cdynamic))
 }
 
 // UpdateVertexBuffer - Update vertex buffer object data on GPU buffer
-func UpdateVertexBuffer(bufferId uint32, data unsafe.Pointer, dataSize int32, offset int32) {
+func UpdateVertexBuffer[T any](bufferId uint32, data []T, offset int32) {
+	if len(data) == 0 {
+		return
+	}
+	var z T
 	cbufferId := C.uint(bufferId)
-	cdata := data
-	cdataSize := C.int(dataSize)
+	cdata := unsafe.Pointer(&data[0])
+	cdataSize := C.int(int(unsafe.Sizeof(z)) * len(data))
 	coffset := C.int(offset)
 	C.rlUpdateVertexBuffer(cbufferId, cdata, cdataSize, coffset)
 }
 
 // UpdateVertexBufferElements - Update vertex buffer elements data on GPU buffer
-func UpdateVertexBufferElements(id uint32, data unsafe.Pointer, dataSize int32, offset int32) {
+func UpdateVertexBufferElements[T any](id uint32, data []T, offset int32) {
+	if len(data) == 0 {
+		return
+	}
+	var z T
 	cid := C.uint(id)
-	cdata := data
-	cdataSize := C.int(dataSize)
+	cdata := unsafe.Pointer(&data[0])
+	cdataSize := C.int(int(unsafe.Sizeof(z)) * len(data))
 	coffset := C.int(offset)
 	C.rlUpdateVertexBufferElements(cid, cdata, cdataSize, coffset)
 }
