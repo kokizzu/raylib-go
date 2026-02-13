@@ -784,23 +784,43 @@ func SetVertexAttributeDivisor(index uint32, divisor int32) {
 }
 
 // LoadVertexBuffer - Load a vertex buffer object
-func LoadVertexBuffer(buffer unsafe.Pointer, size int32, dynamic bool) uint32 {
-	return rlLoadVertexBuffer(buffer, size, dynamic)
+func LoadVertexBuffer[T any](buffer []T, dynamic bool) uint32 {
+	if len(buffer) == 0 {
+		return 0
+	}
+	var z T
+	size := int32(int(unsafe.Sizeof(z)) * len(buffer))
+	return rlLoadVertexBuffer(unsafe.Pointer(&buffer[0]), size, dynamic)
 }
 
 // LoadVertexBufferElement - Load vertex buffer elements object
-func LoadVertexBufferElement(buffer unsafe.Pointer, size int32, dynamic bool) uint32 {
-	return rlLoadVertexBufferElement(buffer, size, dynamic)
+func LoadVertexBufferElement[T any](buffer []T, dynamic bool) uint32 {
+	if len(buffer) == 0 {
+		return 0
+	}
+	var z T
+	size := int32(int(unsafe.Sizeof(z)) * len(buffer))
+	return rlLoadVertexBufferElement(unsafe.Pointer(&buffer[0]), size, dynamic)
 }
 
 // UpdateVertexBuffer - Update vertex buffer object data on GPU buffer
-func UpdateVertexBuffer(bufferId uint32, data unsafe.Pointer, dataSize int32, offset int32) {
-	rlUpdateVertexBuffer(bufferId, data, dataSize, offset)
+func UpdateVertexBuffer[T any](bufferId uint32, data []T, offset int32) {
+	if len(data) == 0 {
+		return
+	}
+	var z T
+	dataSize := int32(int(unsafe.Sizeof(z)) * len(data))
+	rlUpdateVertexBuffer(bufferId, unsafe.Pointer(&data[0]), dataSize, offset)
 }
 
 // UpdateVertexBufferElements - Update vertex buffer elements data on GPU buffer
-func UpdateVertexBufferElements(id uint32, data unsafe.Pointer, dataSize int32, offset int32) {
-	rlUpdateVertexBufferElements(id, data, dataSize, offset)
+func UpdateVertexBufferElements[T any](id uint32, data []T, offset int32) {
+	if len(data) == 0 {
+		return
+	}
+	var z T
+	dataSize := int32(int(unsafe.Sizeof(z)) * len(data))
+	rlUpdateVertexBufferElements(id, unsafe.Pointer(&data[0]), dataSize, offset)
 }
 
 // SetVertexAttribute - Set vertex attribute data configuration
