@@ -10,7 +10,6 @@ package main
 import (
 	"fmt"
 	"math"
-	"unsafe"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
@@ -70,25 +69,25 @@ func main() {
 	rl.EnableVertexArray(quadVAO)
 
 	// Position VBO (attribute 0, vec3)
-	quadPosVBO := rl.LoadVertexBuffer(unsafe.Pointer(&quadPositions[0]), int32(len(quadPositions)*4), false)
+	quadPosVBO := rl.LoadVertexBuffer(quadPositions, false)
 	defer rl.UnloadVertexBuffer(quadPosVBO)
 	rl.SetVertexAttribute(0, 3, rl.Float, false, 0, 0)
 	rl.EnableVertexAttribute(0)
 
 	// Texcoord VBO (attribute 1, vec2)
-	quadTexVBO := rl.LoadVertexBuffer(unsafe.Pointer(&quadTexcoords[0]), int32(len(quadTexcoords)*4), false)
+	quadTexVBO := rl.LoadVertexBuffer(quadTexcoords, false)
 	defer rl.UnloadVertexBuffer(quadTexVBO)
 	rl.SetVertexAttribute(1, 2, rl.Float, false, 0, 0)
 	rl.EnableVertexAttribute(1)
 
 	// Color VBO (attribute 3, vec4) - dynamic for animation
-	quadColVBO := rl.LoadVertexBuffer(unsafe.Pointer(&quadColors[0]), int32(len(quadColors)*4), true)
+	quadColVBO := rl.LoadVertexBuffer(quadColors, true)
 	defer rl.UnloadVertexBuffer(quadColVBO)
 	rl.SetVertexAttribute(3, 4, rl.Float, false, 0, 0)
 	rl.EnableVertexAttribute(3)
 
 	// Index buffer (EBO)
-	quadIBO := rl.LoadVertexBufferElement(unsafe.Pointer(&quadIndices[0]), int32(len(quadIndices)*2), false)
+	quadIBO := rl.LoadVertexBufferElements(quadIndices, false)
 	defer rl.UnloadVertexBuffer(quadIBO)
 
 	rl.DisableVertexArray()
@@ -127,19 +126,19 @@ func main() {
 	rl.EnableVertexArray(triVAO)
 
 	// Position VBO (attribute 0, vec3)
-	triPosVBO := rl.LoadVertexBuffer(unsafe.Pointer(&triPositions[0]), int32(len(triPositions)*4), false)
+	triPosVBO := rl.LoadVertexBuffer(triPositions, false)
 	defer rl.UnloadVertexBuffer(triPosVBO)
 	rl.SetVertexAttribute(0, 3, rl.Float, false, 0, 0)
 	rl.EnableVertexAttribute(0)
 
 	// Texcoord VBO (attribute 1, vec2)
-	triTexVBO := rl.LoadVertexBuffer(unsafe.Pointer(&triTexcoords[0]), int32(len(triTexcoords)*4), false)
+	triTexVBO := rl.LoadVertexBuffer(triTexcoords, false)
 	defer rl.UnloadVertexBuffer(triTexVBO)
 	rl.SetVertexAttribute(1, 2, rl.Float, false, 0, 0)
 	rl.EnableVertexAttribute(1)
 
 	// Color VBO (attribute 3, vec4)
-	triColVBO := rl.LoadVertexBuffer(unsafe.Pointer(&triColors[0]), int32(len(triColors)*4), false)
+	triColVBO := rl.LoadVertexBuffer(triColors, false)
 	defer rl.UnloadVertexBuffer(triColVBO)
 	rl.SetVertexAttribute(3, 4, rl.Float, false, 0, 0)
 	rl.EnableVertexAttribute(3)
@@ -191,7 +190,7 @@ func main() {
 			animColors[i*4+2] = b
 			animColors[i*4+3] = 1.0
 		}
-		rl.UpdateVertexBuffer(quadColVBO, unsafe.Pointer(&animColors[0]), int32(len(animColors)*4), 0)
+		rl.UpdateVertexBuffer(quadColVBO, animColors, 0)
 
 		// Flush raylib's internal batch before custom GL draws
 		rl.DrawRenderBatchActive()
