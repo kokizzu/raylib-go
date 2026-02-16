@@ -815,7 +815,7 @@ func UpdateVertexBufferElements[T any](id uint32, data []T, offset int32) {
 	if len(data) == 0 {
 		return
 	}
-	dataSize := int32(int(unsafe.Sizeof(z)) * len(data))
+	dataSize := int32(int(unsafe.Sizeof(data[0])) * len(data))
 	rlUpdateVertexBufferElements(id, unsafe.Pointer(&data[0]), dataSize, offset)
 }
 
