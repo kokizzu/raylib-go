@@ -151,7 +151,7 @@ func main() {
 		quadVAO, quadVBO, triangleVAO, triangleVBO)
 
 	// Orthographic projection: screen-space coordinates, origin top-left
-	// NOTE: rl.GetCameraMatrix2D/rl.GetCameraMatrix could be used to work with rl camera
+	// NOTE: rl.MatrixMultiply(rl.GetMatrixModelview(), rl.GetMatrixProjection()) could be used to work with rl camera
   // See examples/others/rlgl_instanced_quad/main.go
 	mvpMatrix := rl.MatrixOrtho(0, screenWidth, screenHeight, 0, -1, 1)
 
