@@ -1,6 +1,7 @@
 // This example demonstrates the low-level rlgl vertex buffer bindings:
 //   - LoadVertexBuffer / LoadVertexBufferElement: upload vertex + index data to GPU
 //   - SetVertexAttribute: configure vertex attribute pointers
+//   - SetVertexAttributes: configure vertex attribute pointers (interleaved buffers)
 //   - SetVertexAttributeDefault: provide default values for unused attributes
 //   - DrawVertexArrayElements: indexed draw (quad)
 //   - DrawVertexArray: non-indexed draw (triangle)
@@ -20,6 +21,7 @@ const (
 )
 
 func main() {
+	rl.SetConfigFlags(rl.FlagWindowResizable)
 	rl.InitWindow(screenWidth, screenHeight, "rlgl vertex buffer example")
 	defer rl.CloseWindow()
 	rl.SetTargetFPS(60)
@@ -29,30 +31,33 @@ func main() {
 	// Vertices ordered CCW in NDC (since ortho flips Y, screen-CW = NDC-CW,
 	// so we use CCW winding via index order)
 	// ---------------------------------------------------------------
-	quadPositions := []float32{
-		// x, y,  z
-		150, 150, 0, // 0: top-left
-		450, 150, 0, // 1: top-right
-		450, 450, 0, // 2: bottom-right
-		150, 450, 0, // 3: bottom-left
-	}
 
-	quadColors := []float32{
-		// r, g, b, a  (one color per corner)
-		1, 0, 0, 1, // red
-		0, 1, 0, 1, // green
-		0, 0, 1, 1, // blue
-		1, 1, 0, 1, // yellow
+	// QuadVertex stores Pos and Texture coordinates (UV)
+	type QuadVertex struct {
+		Pos rl.Vector3
+		Tex rl.Vector2 // texture cords are unused. But we stil define them so we can bind.
 	}
-
-	// Texcoords (all zeros - we only need the default white texture)
-	quadTexcoords := []float32{
-		0, 0,
-		0, 0,
-		0, 0,
-		0, 0,
+	// Texcords are implicitly zero, because we use the default white texture.
+	quadVertices := []QuadVertex{
+		// top left vertex,
+		{Pos: rl.NewVector3(150, 150, 0)}, // 0 top-left
+		// top right vertex,
+		{Pos: rl.NewVector3(450, 150, 0)}, // 1 top-right
+		// bottom right vertex,
+		{Pos: rl.NewVector3(450, 450, 0)}, // 2 bottom-right
+		// bottom left vertex,
+		{Pos: rl.NewVector3(150, 450, 0)}, // 3 bottom-left
 	}
-
+	// quad Colors are stored in a seperate buffer because we will be updating them.
+	// Keeping it in a seperate buffer allows us to only reupload the updated colors to the GPU.
+	quadColors := []rl.Vector4{
+		rl.NewVector4(1, 0, 0, 1), // top-left: red
+		rl.NewVector4(0, 1, 0, 1), // top-right: green
+		rl.NewVector4(0, 0, 1, 1), // bottom-right: blue
+		rl.NewVector4(1, 1, 0, 1), // bottom-left: yellow
+	}
+	// Describe how to draw those 4 vertices. We will draw them 6 times to make a square (quad).
+	// Look at the indices above.
 	// CCW winding in NDC (with Y-flip ortho: reverse the original CW order)
 	quadIndices := []uint16{
 		0, 2, 1, // first triangle (CCW in NDC)
@@ -63,86 +68,73 @@ func main() {
 	// Quad VAO, VBO, and EBO Creations
 	// DONT FORGOT TO CLEANUP YOUR GPU RESOURCES
 	// ---------------------------------------------------------------
-
-	// Create quad VAO
+	// Create quad VAO for binding attributes
 	quadVAO := rl.LoadVertexArray()
 	rl.EnableVertexArray(quadVAO)
 
-	// Position VBO (attribute 0, vec3)
-	quadPosVBO := rl.LoadVertexBuffer(quadPositions, false)
-	defer rl.UnloadVertexBuffer(quadPosVBO)
-	rl.SetVertexAttribute(0, 3, rl.Float, false, 0, 0)
-	rl.EnableVertexAttribute(0)
-
-	// Texcoord VBO (attribute 1, vec2)
-	quadTexVBO := rl.LoadVertexBuffer(quadTexcoords, false)
-	defer rl.UnloadVertexBuffer(quadTexVBO)
-	rl.SetVertexAttribute(1, 2, rl.Float, false, 0, 0)
-	rl.EnableVertexAttribute(1)
+	// Create quad VBO for storing vertices
+	quadVBO := rl.LoadVertexBuffer(quadVertices, false)
+	defer rl.UnloadVertexBuffer(quadVBO)
+	// Bind attributes to quadVAO
+	rl.SetVertexAttributes(quadVertices, []rl.VertexAttributesConfig{
+		// Position VBO (attribute 0, vec3)
+		{Field: "Pos", Attribute: 0},
+		// Texcoord VBO (attribute 1, vec2)
+		{Field: "Tex", Attribute: 1},
+	})
+	// Create quad VBO for storing vertex colors. Explanation above.
+	quadColorVBO := rl.LoadVertexBuffer(quadColors, true)
+	defer rl.UnloadVertexBuffer(quadColorVBO)
 
 	// Color VBO (attribute 3, vec4) - dynamic for animation
-	quadColVBO := rl.LoadVertexBuffer(quadColors, true)
-	defer rl.UnloadVertexBuffer(quadColVBO)
 	rl.SetVertexAttribute(3, 4, rl.Float, false, 0, 0)
 	rl.EnableVertexAttribute(3)
 
-	// Index buffer (EBO)
+	// Index buffer (EBO) (for indexed drawing of vertices)
 	quadIBO := rl.LoadVertexBufferElements(quadIndices, false)
 	defer rl.UnloadVertexBuffer(quadIBO)
-
-	rl.DisableVertexArray()
+	rl.DisableVertexArray() // disable quadVAO that was enabled on creation.
 
 	// ---------------------------------------------------------------
 	// Triangle (non-indexed draw) - on the right side
 	// Vertices in CCW order in NDC (with Y-flip ortho)
 	// ---------------------------------------------------------------
-	triPositions := []float32{
-		// x, y, z  (CCW in NDC with Y-flip)
-		575, 200, 0, // top
-		575, 450, 0, // bottom-left
-		700, 450, 0, // bottom-right
+	// We dont update the triangle's colors, so keep everything in 1 buffer
+	type TriangleVertex struct {
+		Pos   rl.Vector3
+		Tex   rl.Vector2 // texture cords are unused. But we stil define them so we can bind.
+		Color rl.Vector4 // RGBA represented with floats.
 	}
-
-	triColors := []float32{
-		// r, g, b, a
-		1.0, 0.0, 1.0, 1.0, // magenta
-		0.0, 1.0, 1.0, 1.0, // cyan
-		1.0, 1.0, 1.0, 1.0, // white
+	// define how the fields will be bound. Define them up here for clarity.
+	triangleVertexAttributesConfig := []rl.VertexAttributesConfig{
+		// Position VBO (attribute 0, vec3)
+		{Field: "Pos", Attribute: 0},
+		// Texcoord VBO (attribute 1, vec2)
+		{Field: "Tex", Attribute: 1},
+		// Color VBO (attribute 3, vec4)
+		{Field: "Color", Attribute: 3},
 	}
-
-	triTexcoords := []float32{
-		0, 0,
-		0, 0,
-		0, 0,
+	// actual VBO data that will be uploaded to the GPU only once.
+	triangleVertices := []TriangleVertex{
+		// (CCW in NDC with Y-flip)       Magenta
+		{Pos: rl.NewVector3(575, 200, 0), Color: rl.NewVector4(1, 0, 1, 1)}, // top
+		// left                           Cyan
+		{Pos: rl.NewVector3(575, 450, 0), Color: rl.NewVector4(0, 1, 1, 1)}, // left
+		// right                          White
+		{Pos: rl.NewVector3(700, 450, 0), Color: rl.NewVector4(1, 1, 1, 1)}, // right
 	}
-
 	// ---------------------------------------------------------------
-  // Triangle VAO, and VBO creation
+	// Triangle VAO, and VBO creation
 	// DONT FORGOT TO CLEANUP YOUR GPU RESOURCES
 	// ---------------------------------------------------------------
-
 	// Create triangle VAO
-	triVAO := rl.LoadVertexArray()
-	rl.EnableVertexArray(triVAO)
-
-	// Position VBO (attribute 0, vec3)
-	triPosVBO := rl.LoadVertexBuffer(triPositions, false)
-	defer rl.UnloadVertexBuffer(triPosVBO)
-	rl.SetVertexAttribute(0, 3, rl.Float, false, 0, 0)
-	rl.EnableVertexAttribute(0)
-
-	// Texcoord VBO (attribute 1, vec2)
-	triTexVBO := rl.LoadVertexBuffer(triTexcoords, false)
-	defer rl.UnloadVertexBuffer(triTexVBO)
-	rl.SetVertexAttribute(1, 2, rl.Float, false, 0, 0)
-	rl.EnableVertexAttribute(1)
-
-	// Color VBO (attribute 3, vec4)
-	triColVBO := rl.LoadVertexBuffer(triColors, false)
-	defer rl.UnloadVertexBuffer(triColVBO)
-	rl.SetVertexAttribute(3, 4, rl.Float, false, 0, 0)
-	rl.EnableVertexAttribute(3)
-
+	triangleVAO := rl.LoadVertexArray()
+	rl.EnableVertexArray(triangleVAO)
+	// Upload vertices
+	triangleVBO := rl.LoadVertexBuffer(triangleVertices, false)
+	defer rl.UnloadVertexBuffer(triangleVBO)
+	// Bind the attributes.
+	rl.SetVertexAttributes(triangleVertices, triangleVertexAttributesConfig)
 	rl.DisableVertexArray()
 
 	// ---------------------------------------------------------------
@@ -155,21 +147,19 @@ func main() {
 
 	fmt.Printf("DEBUG: shaderID=%d mvpLoc=%d colDiffuseLoc=%d texID=%d\n",
 		defaultShaderID, mvpLoc, colDiffuseLoc, defaultTexID)
-	fmt.Printf("DEBUG: quadVAO=%d quadPosVBO=%d quadColVBO=%d quadIBO=%d\n",
-		quadVAO, quadPosVBO, quadColVBO, quadIBO)
-	fmt.Printf("DEBUG: triVAO=%d triPosVBO=%d triColVBO=%d\n",
-		triVAO, triPosVBO, triColVBO)
+	fmt.Printf("DEBUG: quadVAO=%d quadVBO=%d triangleVAO=%d triangleVBO=%d\n",
+		quadVAO, quadVBO, triangleVAO, triangleVBO)
 
 	// Orthographic projection: screen-space coordinates, origin top-left
-  // NOTE: rl.GetCameraMatrix2D/rl.GetCameraMatrix could be used to work with rl camera
-  // Need to test...
+	// NOTE: rl.GetCameraMatrix2D/rl.GetCameraMatrix could be used to work with rl camera
+	// Need to test...
 	mvpMatrix := rl.MatrixOrtho(0, screenWidth, screenHeight, 0, -1, 1)
 
 	// White diffuse color so vertex colors pass through unmodified
 	whiteDiffuse := []float32{1, 1, 1, 1}
 
 	// Working buffer for animated quad colors
-	animColors := make([]float32, len(quadColors))
+	animColors := make([]rl.Vector4, 4)
 
 	for !rl.WindowShouldClose() {
 		rl.BeginDrawing()
@@ -185,12 +175,9 @@ func main() {
 			r := 0.5 + 0.5*float32(math.Sin(float64(t*2.0+phase)))
 			g := 0.5 + 0.5*float32(math.Sin(float64(t*2.0+phase+math.Pi*2.0/3.0)))
 			b := 0.5 + 0.5*float32(math.Sin(float64(t*2.0+phase+math.Pi*4.0/3.0)))
-			animColors[i*4+0] = r
-			animColors[i*4+1] = g
-			animColors[i*4+2] = b
-			animColors[i*4+3] = 1.0
+			animColors[i] = rl.NewVector4(r, g, b, 1.0)
 		}
-		rl.UpdateVertexBuffer(quadColVBO, animColors, 0)
+		rl.UpdateVertexBuffer(quadColorVBO, animColors, 0)
 
 		// Flush raylib's internal batch before custom GL draws
 		rl.DrawRenderBatchActive()
@@ -208,7 +195,7 @@ func main() {
 		rl.DisableVertexArray()
 
 		// Draw triangle (non-indexed)
-		rl.EnableVertexArray(triVAO)
+		rl.EnableVertexArray(triangleVAO)
 		rl.DrawVertexArray(0, 3)
 		rl.DisableVertexArray()
 
@@ -222,7 +209,6 @@ func main() {
 		// Text overlays
 		rl.DrawText("rlgl Vertex Buffer Bindings Test", 10, 10, 20, rl.DarkGray)
 		rl.DrawFPS(int32(rl.GetScreenWidth())-100, 10)
-
 		rl.EndDrawing()
 	}
 }
