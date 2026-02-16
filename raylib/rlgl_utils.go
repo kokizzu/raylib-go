@@ -31,12 +31,10 @@ func SetVertexAttributes[T any](vertices []T, attributes []VertexAttributesConfi
 	if len(vertices) == 0 {
 		return
 	}
-	// Get reflect.Type of the struct
-	var zero T
 	// reflect.TypeFor but for go 1.21
 	t := reflect.TypeOf((*T)(nil)).Elem()
 	// Compute stride (size of one vertex in bytes)
-	stride := int32(unsafe.Sizeof(vertices[0))
+	stride := int32(unsafe.Sizeof(vertices[0]))
 	kind := t.Kind()
 
 	switch kind {

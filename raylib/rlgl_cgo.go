@@ -625,7 +625,6 @@ func LoadVertexBuffer[T any](buffer []T, dynamic bool) uint32 {
 	if len(buffer) == 0 {
 		return 0
 	}
-	var z T
 	cbuffer := unsafe.Pointer(&buffer[0])
 	csize := C.int(int(unsafe.Sizeof(buffer[0])) * len(buffer))
 	cdynamic := C.bool(dynamic)
@@ -637,7 +636,6 @@ func LoadVertexBufferElements[T any](buffer []T, dynamic bool) uint32 {
 	if len(buffer) == 0 {
 		return 0
 	}
-	var z T
 	cbuffer := unsafe.Pointer(&buffer[0])
 	csize := C.int(int(unsafe.Sizeof(buffer[0])) * len(buffer))
 	cdynamic := C.bool(dynamic)
@@ -649,7 +647,6 @@ func UpdateVertexBuffer[T any](bufferId uint32, data []T, offset int32) {
 	if len(data) == 0 {
 		return
 	}
-	var z T
 	cbufferId := C.uint(bufferId)
 	cdata := unsafe.Pointer(&data[0])
 	cdataSize := C.int(int(unsafe.Sizeof(data[0])) * len(data))
@@ -662,7 +659,6 @@ func UpdateVertexBufferElements[T any](id uint32, data []T, offset int32) {
 	if len(data) == 0 {
 		return
 	}
-	var z T
 	cid := C.uint(id)
 	cdata := unsafe.Pointer(&data[0])
 	cdataSize := C.int(int(unsafe.Sizeof(data[0])) * len(data))
