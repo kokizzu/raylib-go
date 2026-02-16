@@ -627,7 +627,7 @@ func LoadVertexBuffer[T any](buffer []T, dynamic bool) uint32 {
 	}
 	var z T
 	cbuffer := unsafe.Pointer(&buffer[0])
-	csize := C.int(int(unsafe.Sizeof(z)) * len(buffer))
+	csize := C.int(int(unsafe.Sizeof(buffer[0])) * len(buffer))
 	cdynamic := C.bool(dynamic)
 	return uint32(C.rlLoadVertexBuffer(cbuffer, csize, cdynamic))
 }
@@ -639,7 +639,7 @@ func LoadVertexBufferElements[T any](buffer []T, dynamic bool) uint32 {
 	}
 	var z T
 	cbuffer := unsafe.Pointer(&buffer[0])
-	csize := C.int(int(unsafe.Sizeof(z)) * len(buffer))
+	csize := C.int(int(unsafe.Sizeof(buffer[0])) * len(buffer))
 	cdynamic := C.bool(dynamic)
 	return uint32(C.rlLoadVertexBufferElement(cbuffer, csize, cdynamic))
 }
@@ -652,7 +652,7 @@ func UpdateVertexBuffer[T any](bufferId uint32, data []T, offset int32) {
 	var z T
 	cbufferId := C.uint(bufferId)
 	cdata := unsafe.Pointer(&data[0])
-	cdataSize := C.int(int(unsafe.Sizeof(z)) * len(data))
+	cdataSize := C.int(int(unsafe.Sizeof(data[0])) * len(data))
 	coffset := C.int(offset)
 	C.rlUpdateVertexBuffer(cbufferId, cdata, cdataSize, coffset)
 }
@@ -665,7 +665,7 @@ func UpdateVertexBufferElements[T any](id uint32, data []T, offset int32) {
 	var z T
 	cid := C.uint(id)
 	cdata := unsafe.Pointer(&data[0])
-	cdataSize := C.int(int(unsafe.Sizeof(z)) * len(data))
+	cdataSize := C.int(int(unsafe.Sizeof(data[0])) * len(data))
 	coffset := C.int(offset)
 	C.rlUpdateVertexBufferElements(cid, cdata, cdataSize, coffset)
 }

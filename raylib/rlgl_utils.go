@@ -6,7 +6,7 @@ import (
 	"unsafe"
 )
 
-// VertexAttributesConfig is used by SetVertexAttributes to specify VAO bindings for a slice of structs.
+// VertexAttributesConfig is used by [SetVertexAttributes] to specify VAO bindings for a slice of structs or arrays.
 type VertexAttributesConfig struct {
 	Field      string // Name of the field in the struct (ignored when slice is backed by an array instead of struct [][2]float32)
 	Attribute  uint32 // OpenGL attribute index (layout location)
@@ -36,7 +36,7 @@ func SetVertexAttributes[T any](vertices []T, attributes []VertexAttributesConfi
 	// reflect.TypeFor but for go 1.21
 	t := reflect.TypeOf((*T)(nil)).Elem()
 	// Compute stride (size of one vertex in bytes)
-	stride := int32(unsafe.Sizeof(zero))
+	stride := int32(unsafe.Sizeof(vertices[0))
 	kind := t.Kind()
 
 	switch kind {
