@@ -82,7 +82,8 @@ func traceLogCallbackWrapper(fn TraceLogCallbackFun) uintptr {
 			var ret int32
 			vsprintf.Call(&ret, &bufferPtr, &text, &args)
 			if ret > 0 {
-				text = bufferPtr
+				fn(int(logLevel), convert.ToString(bufferPtr))
+				return 0
 			}
 		}
 		fn(int(logLevel), convert.ToString(text))
