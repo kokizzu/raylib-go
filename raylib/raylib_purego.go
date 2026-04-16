@@ -4,6 +4,8 @@
 package rl
 
 import (
+	"unsafe"
+
 	"github.com/gen2brain/raylib-go/raylib/internal/convert"
 	"github.com/jupiterrider/ffi"
 )
@@ -33,6 +35,22 @@ var (
 	restoreWindow            ffi.Fun
 	setWindowIcon            ffi.Fun
 	setWindowIcons           ffi.Fun
+	setWindowTitle           ffi.Fun
+	setWindowPosition        ffi.Fun
+	setWindowMonitor         ffi.Fun
+	setWindowMinSize         ffi.Fun
+	setWindowMaxSize         ffi.Fun
+	setWindowSize            ffi.Fun
+	setWindowOpacity         ffi.Fun
+	setWindowFocused         ffi.Fun
+	getWindowHandle          ffi.Fun
+	getScreenWidth           ffi.Fun
+	getScreenHeight          ffi.Fun
+	getRenderWidth           ffi.Fun
+	getRenderHeight          ffi.Fun
+	getMonitorCount          ffi.Fun
+	getCurrentMonitor        ffi.Fun
+	getMonitorPosition       ffi.Fun
 )
 
 func init() {
@@ -59,12 +77,28 @@ func init() {
 	restoreWindow = must(raylibDll.Prep("RestoreWindow", &ffi.TypeVoid))
 	setWindowIcon = must(raylibDll.Prep("SetWindowIcon", &ffi.TypeVoid, &typeImage))
 	setWindowIcons = must(raylibDll.Prep("SetWindowIcons", &ffi.TypeVoid, &ffi.TypePointer, &ffi.TypeSint32))
+	setWindowTitle = must(raylibDll.Prep("SetWindowTitle", &ffi.TypeVoid, &ffi.TypePointer))
+	setWindowPosition = must(raylibDll.Prep("SetWindowPosition", &ffi.TypeVoid, &ffi.TypeSint32, &ffi.TypeSint32))
+	setWindowMonitor = must(raylibDll.Prep("SetWindowMonitor", &ffi.TypeVoid, &ffi.TypeSint32))
+	setWindowMinSize = must(raylibDll.Prep("SetWindowMinSize", &ffi.TypeVoid, &ffi.TypeSint32, &ffi.TypeSint32))
+	setWindowMaxSize = must(raylibDll.Prep("SetWindowMaxSize", &ffi.TypeVoid, &ffi.TypeSint32, &ffi.TypeSint32))
+	setWindowSize = must(raylibDll.Prep("SetWindowSize", &ffi.TypeSint32, &ffi.TypeSint32))
+	setWindowOpacity = must(raylibDll.Prep("SetWindowOpacity", &ffi.TypeVoid, &ffi.TypeFloat))
+	setWindowFocused = must(raylibDll.Prep("SetWindowFocused", &ffi.TypeVoid))
+	getWindowHandle = must(raylibDll.Prep("GetWindowHandle", &ffi.TypePointer))
+	getScreenWidth = must(raylibDll.Prep("GetWindowHandle", &ffi.TypeSint32))
+	getScreenHeight = must(raylibDll.Prep("GetScreenHeight", &ffi.TypeSint32))
+	getRenderWidth = must(raylibDll.Prep("GetRenderWidth", &ffi.TypeSint32))
+	getRenderHeight = must(raylibDll.Prep("GetRenderHeight", &ffi.TypeSint32))
+	getMonitorCount = must(raylibDll.Prep("GetMonitorCount", &ffi.TypeSint32))
+	getCurrentMonitor = must(raylibDll.Prep("GetCurrentMonitor", &ffi.TypeSint32))
+	getMonitorPosition = must(raylibDll.Prep("GetMonitorPosition", &typeVector2, &ffi.TypeSint32))
 }
 
 // InitWindow - Initialize window and OpenGL context
 func InitWindow(width int32, height int32, title string) {
-	ctitle := convert.ToBytePtr(title)
-	initWindow.Call(nil, &width, &height, &ctitle)
+	cTitle := convert.ToBytePtr(title)
+	initWindow.Call(nil, &width, &height, &cTitle)
 }
 
 // CloseWindow - Close window and unload OpenGL context
@@ -179,6 +213,109 @@ func SetWindowIcon(image Image) {
 func SetWindowIcons(images []Image, count int32) {
 	imagesPtr := &images[0]
 	setWindowIcons.Call(nil, &imagesPtr, &count)
+}
+
+// SetWindowTitle - Set title for window (only PLATFORM_DESKTOP and PLATFORM_WEB)
+func SetWindowTitle(title string) {
+	cTitle := convert.ToBytePtr(title)
+	setWindowTitle.Call(nil, &cTitle)
+}
+
+// SetWindowPosition - Set window position on screen (only PLATFORM_DESKTOP)
+func SetWindowPosition(x int, y int) {
+	posX, posY := int32(x), int32(y)
+	setWindowPosition.Call(nil, &posX, &posY)
+}
+
+// SetWindowMonitor - Set monitor for the current window
+func SetWindowMonitor(monitor int) {
+	m := int32(monitor)
+	setWindowMonitor.Call(nil, &m)
+}
+
+// SetWindowMinSize - Set window minimum dimensions (for FLAG_WINDOW_RESIZABLE)
+func SetWindowMinSize(width int, height int) {
+	w, h := int32(width), int32(height)
+	setWindowMinSize.Call(nil, &w, &h)
+}
+
+// SetWindowMaxSize - Set window maximum dimensions (for FLAG_WINDOW_RESIZABLE)
+func SetWindowMaxSize(width int, height int) {
+	w, h := int32(width), int32(height)
+	setWindowMaxSize.Call(nil, &w, &h)
+}
+
+// SetWindowSize - Set window dimensions
+func SetWindowSize(width int, height int) {
+	w, h := int32(width), int32(height)
+	setWindowSize.Call(nil, &w, &h)
+}
+
+// SetWindowOpacity - Set window opacity [0.0f..1.0f] (only PLATFORM_DESKTOP)
+func SetWindowOpacity(opacity float32) {
+	setWindowOpacity.Call(nil, &opacity)
+}
+
+// SetWindowFocused - Set window focused (only PLATFORM_DESKTOP)
+func SetWindowFocused() {
+	setWindowFocused.Call(nil)
+}
+
+// GetWindowHandle - Get native window handle
+func GetWindowHandle() unsafe.Pointer {
+	var ret unsafe.Pointer
+	getWindowHandle.Call(&ret)
+	return ret
+}
+
+// GetScreenWidth - Get current screen width
+func GetScreenWidth() int {
+	var ret ffi.Arg
+	getScreenWidth.Call(&ret)
+	return int(ret)
+}
+
+// GetScreenHeight - Get current screen height
+func GetScreenHeight() int {
+	var ret ffi.Arg
+	getScreenHeight.Call(&ret)
+	return int(ret)
+}
+
+// GetRenderWidth - Get current render width (it considers HiDPI)
+func GetRenderWidth() int {
+	var ret ffi.Arg
+	getRenderWidth.Call(&ret)
+	return int(ret)
+}
+
+// GetRenderHeight - Get current render height (it considers HiDPI)
+func GetRenderHeight() int {
+	var ret ffi.Arg
+	getRenderHeight.Call(&ret)
+	return int(ret)
+}
+
+// GetMonitorCount - Get number of connected monitors
+func GetMonitorCount() int {
+	var ret ffi.Arg
+	getMonitorCount.Call(&ret)
+	return int(ret)
+}
+
+// GetCurrentMonitor - Get current monitor where window is placed
+func GetCurrentMonitor() int {
+	var ret ffi.Arg
+	getCurrentMonitor.Call(&ret)
+	return int(ret)
+}
+
+// GetMonitorPosition - Get specified monitor position
+func GetMonitorPosition(monitor int) Vector2 {
+	var ret Vector2
+	m := int32(monitor)
+	getMonitorPosition.Call(&ret, &m)
+	return ret
 }
 
 // SetTraceLogCallback - Set custom trace log
