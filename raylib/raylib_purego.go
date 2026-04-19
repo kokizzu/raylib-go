@@ -14,6 +14,8 @@ var (
 	// dll is the pointer to the shared library
 	dll ffi.Lib = loadLibrary()
 
+	// Window-related functions
+
 	initWindow               = dll.MustPrep("InitWindow", &ffi.TypeVoid, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypePointer)
 	closeWindow              = dll.MustPrep("CloseWindow", &ffi.TypeVoid)
 	setTraceLogCallback      = dll.MustPrep("SetTraceLogCallback", &ffi.TypeVoid, &ffi.TypePointer)
@@ -59,6 +61,20 @@ var (
 	getWindowPosition        = dll.MustPrep("GetWindowPosition", &typeVector2)
 	getWindowScaleDPI        = dll.MustPrep("GetWindowScaleDPI", &typeVector2)
 	getMonitorName           = dll.MustPrep("GetMonitorName", &ffi.TypePointer, &ffi.TypeSint32)
+	setClipboardText         = dll.MustPrep("SetClipboardText", &ffi.TypeVoid, &ffi.TypePointer)
+	getClipboardText         = dll.MustPrep("GetClipboardText", &ffi.TypePointer)
+	getClipboardImage        = dll.MustPrep("GetClipboardImage", &typeImage)
+	enableEventWaiting       = dll.MustPrep("EnableEventWaiting", &ffi.TypeVoid)
+	disableEventWaiting      = dll.MustPrep("DisableEventWaiting", &ffi.TypeVoid)
+
+	// Cursor-related functions
+
+	showCursor       = dll.MustPrep("ShowCursor", &ffi.TypeVoid)
+	hideCursor       = dll.MustPrep("HideCursor", &ffi.TypeVoid)
+	isCursorHidden   = dll.MustPrep("IsCursorHidden", &ffi.TypeUint8)
+	enableCursor     = dll.MustPrep("EnableCursor", &ffi.TypeVoid)
+	disableCursor    = dll.MustPrep("DisableCursor", &ffi.TypeVoid)
+	isCursorOnScreen = dll.MustPrep("IsCursorOnScreen", &ffi.TypeUint8)
 )
 
 // InitWindow - Initialize window and OpenGL context
@@ -344,6 +360,72 @@ func GetMonitorName(monitor int) string {
 	m := int32(monitor)
 	getMonitorName.Call(&ret, &m)
 	return convert.ToString(ret)
+}
+
+// SetClipboardText - Set clipboard text content
+func SetClipboardText(text string) {
+	cText := convert.ToBytePtr(text)
+	setClipboardText.Call(nil, &cText)
+}
+
+// GetClipboardText - Get clipboard text content
+func GetClipboardText() string {
+	var ret *byte
+	getClipboardText.Call(&ret)
+	return convert.ToString(ret)
+}
+
+// GetClipboardImage - Get clipboard image content
+//
+// Only works with SDL3 backend or Windows with RGFW/GLFW
+func GetClipboardImage() Image {
+	var ret Image
+	getClipboardImage.Call(&ret)
+	return ret
+}
+
+// EnableEventWaiting - Enable waiting for events on EndDrawing(), no automatic event polling
+func EnableEventWaiting() {
+	enableEventWaiting.Call(nil)
+}
+
+// DisableEventWaiting - Disable waiting for events on EndDrawing(), automatic events polling
+func DisableEventWaiting() {
+	disableEventWaiting.Call(nil)
+}
+
+// ShowCursor - Shows cursor
+func ShowCursor() {
+	showCursor.Call(nil)
+}
+
+// HideCursor - Hides cursor
+func HideCursor() {
+	hideCursor.Call(nil)
+}
+
+// IsCursorHidden - Check if cursor is not visible
+func IsCursorHidden() bool {
+	var ret ffi.Arg
+	isCursorHidden.Call(&ret)
+	return ret.Bool()
+}
+
+// EnableCursor - Enables cursor (unlock cursor)
+func EnableCursor() {
+	enableCursor.Call(nil)
+}
+
+// DisableCursor - Disables cursor (lock cursor)
+func DisableCursor() {
+	disableCursor.Call(nil)
+}
+
+// IsCursorOnScreen - Check if cursor is on the screen
+func IsCursorOnScreen() bool {
+	var ret ffi.Arg
+	isCursorOnScreen.Call(&ret)
+	return ret.Bool()
 }
 
 // SetTraceLogCallback - Set custom trace log
