@@ -2,5 +2,7 @@ github.com/ebitengine/purego v0.10.0 h1:QIw4xfpWT6GWTzaW5XEKy3HXoqrJGx1ijYHzTF0/
 github.com/ebitengine/purego v0.10.0/go.mod h1:iIjxzd6CiRiOG0UyXP+V1+jWqUXVjPKLAI0mRfJZTmQ=
 github.com/jupiterrider/ffi v0.6.1-0.20260408164722-1fcb75fe9804 h1:fVyQVshUfAhUV/L/pxLk9XTnzZ1C54pPwi9pdvXWv8A=
 github.com/jupiterrider/ffi v0.6.1-0.20260408164722-1fcb75fe9804/go.mod h1:9dauhpOfNqrqk28fxuu0kkdeFtT9Qr4vbfigiuIXN7c=
+github.com/jupiterrider/ffi v0.6.1-0.20260419091835-618c23eb15e3 h1:I4UHHamGHcLljjW6ms8D4cdguaC2def+OfGtLfAzaOQ=
+github.com/jupiterrider/ffi v0.6.1-0.20260419091835-618c23eb15e3/go.mod h1:9dauhpOfNqrqk28fxuu0kkdeFtT9Qr4vbfigiuIXN7c=
 golang.org/x/exp v0.0.0-20240506185415-9bf2ced13842 h1:vr/HnozRka3pE4EsMEg1lgkXJkTFJCVUX+S/ZT6wYzM=
 golang.org/x/exp v0.0.0-20240506185415-9bf2ced13842/go.mod h1:XtvwrStGgqGPLc4cjQfWqZHG1YFdYs6swckp8vpsjnc=

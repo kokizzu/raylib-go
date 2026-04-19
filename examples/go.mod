@@ -21,6 +21,6 @@ require (
 
 require (
 	github.com/ebitengine/purego v0.10.0 // indirect
-	github.com/jupiterrider/ffi v0.6.1-0.20260408164722-1fcb75fe9804 // indirect
+	github.com/jupiterrider/ffi v0.6.1-0.20260419091835-618c23eb15e3 // indirect
 	golang.org/x/exp v0.0.0-20241108190413-2d47ceb2692f // indirect
 )

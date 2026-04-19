@@ -11,89 +11,55 @@ import (
 )
 
 var (
-	// raylibDll is the pointer to the shared library
-	raylibDll ffi.Lib
+	// dll is the pointer to the shared library
+	dll ffi.Lib = loadLibrary()
 
-	initWindow               ffi.Fun
-	closeWindow              ffi.Fun
-	setTraceLogCallback      ffi.Fun
-	windowShouldClose        ffi.Fun
-	isWindowReady            ffi.Fun
-	isWindowFullscreen       ffi.Fun
-	isWindowHidden           ffi.Fun
-	isWindowMinimized        ffi.Fun
-	isWindowMaximized        ffi.Fun
-	isWindowFocused          ffi.Fun
-	isWindowResized          ffi.Fun
-	isWindowState            ffi.Fun
-	setWindowState           ffi.Fun
-	clearWindowState         ffi.Fun
-	toggleFullscreen         ffi.Fun
-	toggleBorderlessWindowed ffi.Fun
-	maximizeWindow           ffi.Fun
-	minimizeWindow           ffi.Fun
-	restoreWindow            ffi.Fun
-	setWindowIcon            ffi.Fun
-	setWindowIcons           ffi.Fun
-	setWindowTitle           ffi.Fun
-	setWindowPosition        ffi.Fun
-	setWindowMonitor         ffi.Fun
-	setWindowMinSize         ffi.Fun
-	setWindowMaxSize         ffi.Fun
-	setWindowSize            ffi.Fun
-	setWindowOpacity         ffi.Fun
-	setWindowFocused         ffi.Fun
-	getWindowHandle          ffi.Fun
-	getScreenWidth           ffi.Fun
-	getScreenHeight          ffi.Fun
-	getRenderWidth           ffi.Fun
-	getRenderHeight          ffi.Fun
-	getMonitorCount          ffi.Fun
-	getCurrentMonitor        ffi.Fun
-	getMonitorPosition       ffi.Fun
+	initWindow               = dll.MustPrep("InitWindow", &ffi.TypeVoid, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypePointer)
+	closeWindow              = dll.MustPrep("CloseWindow", &ffi.TypeVoid)
+	setTraceLogCallback      = dll.MustPrep("SetTraceLogCallback", &ffi.TypeVoid, &ffi.TypePointer)
+	windowShouldClose        = dll.MustPrep("WindowShouldClose", &ffi.TypeUint8)
+	isWindowReady            = dll.MustPrep("IsWindowReady", &ffi.TypeUint8)
+	isWindowFullscreen       = dll.MustPrep("IsWindowFullscreen", &ffi.TypeUint8)
+	isWindowHidden           = dll.MustPrep("IsWindowHidden", &ffi.TypeUint8)
+	isWindowMinimized        = dll.MustPrep("IsWindowMinimized", &ffi.TypeUint8)
+	isWindowMaximized        = dll.MustPrep("IsWindowMaximized", &ffi.TypeUint8)
+	isWindowFocused          = dll.MustPrep("IsWindowFocused", &ffi.TypeUint8)
+	isWindowResized          = dll.MustPrep("IsWindowResized", &ffi.TypeUint8)
+	isWindowState            = dll.MustPrep("IsWindowState", &ffi.TypeUint8, &ffi.TypeUint32)
+	setWindowState           = dll.MustPrep("SetWindowState", &ffi.TypeVoid, &ffi.TypeUint32)
+	clearWindowState         = dll.MustPrep("ClearWindowState", &ffi.TypeVoid, &ffi.TypeUint32)
+	toggleFullscreen         = dll.MustPrep("ToggleFullscreen", &ffi.TypeVoid)
+	toggleBorderlessWindowed = dll.MustPrep("ToggleBorderlessWindowed", &ffi.TypeVoid)
+	maximizeWindow           = dll.MustPrep("MaximizeWindow", &ffi.TypeVoid)
+	minimizeWindow           = dll.MustPrep("MinimizeWindow", &ffi.TypeVoid)
+	restoreWindow            = dll.MustPrep("RestoreWindow", &ffi.TypeVoid)
+	setWindowIcon            = dll.MustPrep("SetWindowIcon", &ffi.TypeVoid, &typeImage)
+	setWindowIcons           = dll.MustPrep("SetWindowIcons", &ffi.TypeVoid, &ffi.TypePointer, &ffi.TypeSint32)
+	setWindowTitle           = dll.MustPrep("SetWindowTitle", &ffi.TypeVoid, &ffi.TypePointer)
+	setWindowPosition        = dll.MustPrep("SetWindowPosition", &ffi.TypeVoid, &ffi.TypeSint32, &ffi.TypeSint32)
+	setWindowMonitor         = dll.MustPrep("SetWindowMonitor", &ffi.TypeVoid, &ffi.TypeSint32)
+	setWindowMinSize         = dll.MustPrep("SetWindowMinSize", &ffi.TypeVoid, &ffi.TypeSint32, &ffi.TypeSint32)
+	setWindowMaxSize         = dll.MustPrep("SetWindowMaxSize", &ffi.TypeVoid, &ffi.TypeSint32, &ffi.TypeSint32)
+	setWindowSize            = dll.MustPrep("SetWindowSize", &ffi.TypeSint32, &ffi.TypeSint32)
+	setWindowOpacity         = dll.MustPrep("SetWindowOpacity", &ffi.TypeVoid, &ffi.TypeFloat)
+	setWindowFocused         = dll.MustPrep("SetWindowFocused", &ffi.TypeVoid)
+	getWindowHandle          = dll.MustPrep("GetWindowHandle", &ffi.TypePointer)
+	getScreenWidth           = dll.MustPrep("GetWindowHandle", &ffi.TypeSint32)
+	getScreenHeight          = dll.MustPrep("GetScreenHeight", &ffi.TypeSint32)
+	getRenderWidth           = dll.MustPrep("GetRenderWidth", &ffi.TypeSint32)
+	getRenderHeight          = dll.MustPrep("GetRenderHeight", &ffi.TypeSint32)
+	getMonitorCount          = dll.MustPrep("GetMonitorCount", &ffi.TypeSint32)
+	getCurrentMonitor        = dll.MustPrep("GetCurrentMonitor", &ffi.TypeSint32)
+	getMonitorPosition       = dll.MustPrep("GetMonitorPosition", &typeVector2, &ffi.TypeSint32)
+	getMonitorWidth          = dll.MustPrep("GetMonitorWidth", &ffi.TypeSint32, &ffi.TypeSint32)
+	getMonitorHeight         = dll.MustPrep("GetMonitorHeight", &ffi.TypeSint32, &ffi.TypeSint32)
+	getMonitorPhysicalWidth  = dll.MustPrep("GetMonitorPhysicalWidth", &ffi.TypeSint32, &ffi.TypeSint32)
+	getMonitorPhysicalHeight = dll.MustPrep("GetMonitorPhysicalHeight", &ffi.TypeSint32, &ffi.TypeSint32)
+	getMonitorRefreshRate    = dll.MustPrep("GetMonitorRefreshRate", &ffi.TypeSint32, &ffi.TypeSint32)
+	getWindowPosition        = dll.MustPrep("GetWindowPosition", &typeVector2)
+	getWindowScaleDPI        = dll.MustPrep("GetWindowScaleDPI", &typeVector2)
+	getMonitorName           = dll.MustPrep("GetMonitorName", &ffi.TypePointer, &ffi.TypeSint32)
 )
-
-func init() {
-	raylibDll = loadLibrary()
-
-	initWindow = must(raylibDll.Prep("InitWindow", &ffi.TypeVoid, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypePointer))
-	closeWindow = must(raylibDll.Prep("CloseWindow", &ffi.TypeVoid))
-	setTraceLogCallback = must(raylibDll.Prep("SetTraceLogCallback", &ffi.TypeVoid, &ffi.TypePointer))
-	windowShouldClose = must(raylibDll.Prep("WindowShouldClose", &ffi.TypeUint8))
-	isWindowReady = must(raylibDll.Prep("IsWindowReady", &ffi.TypeUint8))
-	isWindowFullscreen = must(raylibDll.Prep("IsWindowFullscreen", &ffi.TypeUint8))
-	isWindowHidden = must(raylibDll.Prep("IsWindowHidden", &ffi.TypeUint8))
-	isWindowMinimized = must(raylibDll.Prep("IsWindowMinimized", &ffi.TypeUint8))
-	isWindowMaximized = must(raylibDll.Prep("IsWindowMaximized", &ffi.TypeUint8))
-	isWindowFocused = must(raylibDll.Prep("IsWindowFocused", &ffi.TypeUint8))
-	isWindowResized = must(raylibDll.Prep("IsWindowResized", &ffi.TypeUint8))
-	isWindowState = must(raylibDll.Prep("IsWindowState", &ffi.TypeUint8, &ffi.TypeUint32))
-	setWindowState = must(raylibDll.Prep("SetWindowState", &ffi.TypeVoid, &ffi.TypeUint32))
-	clearWindowState = must(raylibDll.Prep("ClearWindowState", &ffi.TypeVoid, &ffi.TypeUint32))
-	toggleFullscreen = must(raylibDll.Prep("ToggleFullscreen", &ffi.TypeVoid))
-	toggleBorderlessWindowed = must(raylibDll.Prep("ToggleBorderlessWindowed", &ffi.TypeVoid))
-	maximizeWindow = must(raylibDll.Prep("MaximizeWindow", &ffi.TypeVoid))
-	minimizeWindow = must(raylibDll.Prep("MinimizeWindow", &ffi.TypeVoid))
-	restoreWindow = must(raylibDll.Prep("RestoreWindow", &ffi.TypeVoid))
-	setWindowIcon = must(raylibDll.Prep("SetWindowIcon", &ffi.TypeVoid, &typeImage))
-	setWindowIcons = must(raylibDll.Prep("SetWindowIcons", &ffi.TypeVoid, &ffi.TypePointer, &ffi.TypeSint32))
-	setWindowTitle = must(raylibDll.Prep("SetWindowTitle", &ffi.TypeVoid, &ffi.TypePointer))
-	setWindowPosition = must(raylibDll.Prep("SetWindowPosition", &ffi.TypeVoid, &ffi.TypeSint32, &ffi.TypeSint32))
-	setWindowMonitor = must(raylibDll.Prep("SetWindowMonitor", &ffi.TypeVoid, &ffi.TypeSint32))
-	setWindowMinSize = must(raylibDll.Prep("SetWindowMinSize", &ffi.TypeVoid, &ffi.TypeSint32, &ffi.TypeSint32))
-	setWindowMaxSize = must(raylibDll.Prep("SetWindowMaxSize", &ffi.TypeVoid, &ffi.TypeSint32, &ffi.TypeSint32))
-	setWindowSize = must(raylibDll.Prep("SetWindowSize", &ffi.TypeSint32, &ffi.TypeSint32))
-	setWindowOpacity = must(raylibDll.Prep("SetWindowOpacity", &ffi.TypeVoid, &ffi.TypeFloat))
-	setWindowFocused = must(raylibDll.Prep("SetWindowFocused", &ffi.TypeVoid))
-	getWindowHandle = must(raylibDll.Prep("GetWindowHandle", &ffi.TypePointer))
-	getScreenWidth = must(raylibDll.Prep("GetWindowHandle", &ffi.TypeSint32))
-	getScreenHeight = must(raylibDll.Prep("GetScreenHeight", &ffi.TypeSint32))
-	getRenderWidth = must(raylibDll.Prep("GetRenderWidth", &ffi.TypeSint32))
-	getRenderHeight = must(raylibDll.Prep("GetRenderHeight", &ffi.TypeSint32))
-	getMonitorCount = must(raylibDll.Prep("GetMonitorCount", &ffi.TypeSint32))
-	getCurrentMonitor = must(raylibDll.Prep("GetCurrentMonitor", &ffi.TypeSint32))
-	getMonitorPosition = must(raylibDll.Prep("GetMonitorPosition", &typeVector2, &ffi.TypeSint32))
-}
 
 // InitWindow - Initialize window and OpenGL context
 func InitWindow(width int32, height int32, title string) {
@@ -316,6 +282,68 @@ func GetMonitorPosition(monitor int) Vector2 {
 	m := int32(monitor)
 	getMonitorPosition.Call(&ret, &m)
 	return ret
+}
+
+// GetMonitorWidth - Get specified monitor width (current video mode used by monitor)
+func GetMonitorWidth(monitor int) int {
+	var ret ffi.Arg
+	m := int32(monitor)
+	getMonitorWidth.Call(&ret, &m)
+	return int(ret)
+}
+
+// GetMonitorHeight - Get specified monitor height (current video mode used by monitor)
+func GetMonitorHeight(monitor int) int {
+	var ret ffi.Arg
+	m := int32(monitor)
+	getMonitorHeight.Call(&ret, &m)
+	return int(ret)
+}
+
+// GetMonitorPhysicalWidth - Get specified monitor physical width in millimetres
+func GetMonitorPhysicalWidth(monitor int) int {
+	var ret ffi.Arg
+	m := int32(monitor)
+	getMonitorPhysicalWidth.Call(&ret, &m)
+	return int(ret)
+}
+
+// GetMonitorPhysicalHeight - Get specified monitor physical height in millimetres
+func GetMonitorPhysicalHeight(monitor int) int {
+	var ret ffi.Arg
+	m := int32(monitor)
+	getMonitorPhysicalHeight.Call(&ret, &m)
+	return int(ret)
+}
+
+// GetMonitorRefreshRate - Get specified monitor refresh rate
+func GetMonitorRefreshRate(monitor int) int {
+	var ret ffi.Arg
+	m := int32(monitor)
+	getMonitorRefreshRate.Call(&ret, &m)
+	return int(ret)
+}
+
+// GetWindowPosition - Get window position XY on monitor
+func GetWindowPosition() Vector2 {
+	var ret Vector2
+	getWindowPosition.Call(&ret)
+	return ret
+}
+
+// GetWindowScaleDPI - Get window scale DPI factor
+func GetWindowScaleDPI() Vector2 {
+	var ret Vector2
+	getWindowScaleDPI.Call(&ret)
+	return ret
+}
+
+// GetMonitorName - Get the human-readable, UTF-8 encoded name of the specified monitor
+func GetMonitorName(monitor int) string {
+	var ret *byte
+	m := int32(monitor)
+	getMonitorName.Call(&ret, &m)
+	return convert.ToString(ret)
 }
 
 // SetTraceLogCallback - Set custom trace log

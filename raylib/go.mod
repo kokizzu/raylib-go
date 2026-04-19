@@ -6,4 +6,4 @@ require github.com/ebitengine/purego v0.10.0
 
 require golang.org/x/exp v0.0.0-20240506185415-9bf2ced13842
 
-require github.com/jupiterrider/ffi v0.6.1-0.20260408164722-1fcb75fe9804
+require github.com/jupiterrider/ffi v0.6.1-0.20260419091835-618c23eb15e3
