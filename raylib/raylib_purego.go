@@ -151,6 +151,10 @@ var (
 	traceLog            = dll.MustPrepVar("TraceLog", 2, &ffi.TypeVoid, &ffi.TypeSint32, &ffi.TypePointer)
 	setTraceLogCallback = dll.MustPrep("SetTraceLogCallback", &ffi.TypeVoid, &ffi.TypePointer)
 
+	// Memory management, using internal allocators
+
+	memFree = dll.MustPrep("MemFree", &ffi.TypeVoid, &ffi.TypePointer)
+
 	// File system management functions
 
 	isFileDropped      = dll.MustPrep("IsFileDropped", &ffi.TypeUint8)
@@ -278,6 +282,55 @@ var (
 	drawPoly                    = dll.MustPrep("DrawPoly", &ffi.TypeVoid, &typeVector2, &ffi.TypeSint32, &ffi.TypeFloat, &ffi.TypeFloat, &typeColor)
 	drawPolyLines               = dll.MustPrep("DrawPolyLines", &ffi.TypeVoid, &typeVector2, &ffi.TypeSint32, &ffi.TypeFloat, &ffi.TypeFloat, &typeColor)
 	drawPolyLinesEx             = dll.MustPrep("DrawPolyLinesEx", &ffi.TypeVoid, &typeVector2, &ffi.TypeSint32, &ffi.TypeFloat, &ffi.TypeFloat, &ffi.TypeFloat, &typeColor)
+
+	// Splines drawing functions
+
+	drawSplineLinear                 = dll.MustPrep("DrawSplineLinear", &ffi.TypeVoid, &ffi.TypePointer, &ffi.TypeSint32, &ffi.TypeFloat, &typeColor)
+	drawSplineBasis                  = dll.MustPrep("DrawSplineBasis", &ffi.TypeVoid, &ffi.TypePointer, &ffi.TypeSint32, &ffi.TypeFloat, &typeColor)
+	drawSplineCatmullRom             = dll.MustPrep("DrawSplineCatmullRom", &ffi.TypeVoid, &ffi.TypePointer, &ffi.TypeSint32, &ffi.TypeFloat, &typeColor)
+	drawSplineBezierQuadratic        = dll.MustPrep("DrawSplineBezierQuadratic", &ffi.TypeVoid, &ffi.TypePointer, &ffi.TypeSint32, &ffi.TypeFloat, &typeColor)
+	drawSplineBezierCubic            = dll.MustPrep("DrawSplineBezierCubic", &ffi.TypeVoid, &ffi.TypePointer, &ffi.TypeSint32, &ffi.TypeFloat, &typeColor)
+	drawSplineSegmentLinear          = dll.MustPrep("DrawSplineSegmentLinear", &ffi.TypeVoid, &typeVector2, &typeVector2, &ffi.TypeFloat, &typeColor)
+	drawSplineSegmentBasis           = dll.MustPrep("DrawSplineSegmentBasis", &ffi.TypeVoid, &typeVector2, &typeVector2, &typeVector2, &typeVector2, &ffi.TypeFloat, &typeColor)
+	drawSplineSegmentCatmullRom      = dll.MustPrep("DrawSplineSegmentCatmullRom", &ffi.TypeVoid, &typeVector2, &typeVector2, &typeVector2, &typeVector2, &ffi.TypeFloat, &typeColor)
+	drawSplineSegmentBezierQuadratic = dll.MustPrep("DrawSplineSegmentBezierQuadratic", &ffi.TypeVoid, &typeVector2, &typeVector2, &typeVector2, &ffi.TypeFloat, &typeColor)
+	drawSplineSegmentBezierCubic     = dll.MustPrep("DrawSplineSegmentBezierCubic", &ffi.TypeVoid, &typeVector2, &typeVector2, &typeVector2, &typeVector2, &ffi.TypeFloat, &typeColor)
+
+	// Spline segment point evaluation functions, for a given t [0.0f .. 1.0f]
+
+	getSplinePointLinear      = dll.MustPrep("GetSplinePointLinear", &typeVector2, &typeVector2, &typeVector2, &ffi.TypeFloat)
+	getSplinePointBasis       = dll.MustPrep("GetSplinePointBasis", &typeVector2, &typeVector2, &typeVector2, &typeVector2, &typeVector2, &ffi.TypeFloat)
+	getSplinePointCatmullRom  = dll.MustPrep("GetSplinePointCatmullRom", &typeVector2, &typeVector2, &typeVector2, &typeVector2, &typeVector2, &ffi.TypeFloat)
+	getSplinePointBezierQuad  = dll.MustPrep("GetSplinePointBezierQuad", &typeVector2, &typeVector2, &typeVector2, &typeVector2, &ffi.TypeFloat)
+	getSplinePointBezierCubic = dll.MustPrep("GetSplinePointBezierCubic", &typeVector2, &typeVector2, &typeVector2, &typeVector2, &typeVector2, &ffi.TypeFloat)
+
+	// Basic shapes collision detection functions
+
+	checkCollisionRecs          = dll.MustPrep("CheckCollisionRecs", &ffi.TypeUint8, &typeRectangle, &typeRectangle)
+	checkCollisionCircles       = dll.MustPrep("CheckCollisionCircles", &ffi.TypeUint8, &typeVector2, &ffi.TypeFloat, &typeVector2, &ffi.TypeFloat)
+	checkCollisionCircleRec     = dll.MustPrep("CheckCollisionCircleRec", &ffi.TypeUint8, &typeVector2, &ffi.TypeFloat, &typeRectangle)
+	checkCollisionCircleLine    = dll.MustPrep("CheckCollisionCircleLine", &ffi.TypeUint8, &typeVector2, &ffi.TypeFloat, &typeVector2, &typeVector2)
+	checkCollisionPointRec      = dll.MustPrep("CheckCollisionPointRec", &ffi.TypeUint8, &typeVector2, &typeRectangle)
+	checkCollisionPointCircle   = dll.MustPrep("CheckCollisionPointCircle", &ffi.TypeUint8, &typeVector2, &typeVector2, &ffi.TypeFloat)
+	checkCollisionPointTriangle = dll.MustPrep("CheckCollisionPointTriangle", &ffi.TypeUint8, &typeVector2, &typeVector2, &typeVector2, &typeVector2)
+	checkCollisionPointLine     = dll.MustPrep("CheckCollisionPointLine", &ffi.TypeUint8, &typeVector2, &typeVector2, &typeVector2, &ffi.TypeSint32)
+	checkCollisionPointPoly     = dll.MustPrep("CheckCollisionPointPoly", &ffi.TypeUint8, &typeVector2, &ffi.TypePointer, &ffi.TypeSint32)
+	checkCollisionLines         = dll.MustPrep("CheckCollisionLines", &ffi.TypeUint8, &typeVector2, &typeVector2, &typeVector2, &typeVector2, &ffi.TypePointer)
+	getCollisionRec             = dll.MustPrep("GetCollisionRec", &typeRectangle, &typeRectangle, &typeRectangle)
+
+	// Image loading functions
+
+	loadImage               = dll.MustPrep("LoadImage", &typeImage, &ffi.TypePointer)
+	loadImageRaw            = dll.MustPrep("LoadImageRaw", &typeImage, &ffi.TypePointer, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32)
+	loadImageAnim           = dll.MustPrep("LoadImageAnim", &typeImage, &ffi.TypePointer, &ffi.TypePointer)
+	loadImageAnimFromMemory = dll.MustPrep("LoadImageAnimFromMemory", &typeImage, &ffi.TypePointer, &ffi.TypePointer, &ffi.TypeSint32, &ffi.TypePointer)
+	loadImageFromMemory     = dll.MustPrep("LoadImageFromMemory", &typeImage, &ffi.TypePointer, &ffi.TypePointer, &ffi.TypeSint32)
+	loadImageFromTexture    = dll.MustPrep("LoadImageFromTexture", &typeImage, &typeTexture2D)
+	loadImageFromScreen     = dll.MustPrep("LoadImageFromScreen", &typeImage)
+	isImageValid            = dll.MustPrep("IsImageValid", &ffi.TypeUint8, &typeImage)
+	unloadImage             = dll.MustPrep("UnloadImage", &ffi.TypeVoid, &typeImage)
+	exportImage             = dll.MustPrep("ExportImage", &ffi.TypeUint8, &typeImage, &ffi.TypePointer)
+	exportImageToMemory     = dll.MustPrep("ExportImageToMemory", &ffi.TypePointer, &typeImage, &ffi.TypePointer, &ffi.TypePointer)
 )
 
 // InitWindow - Initialize window and OpenGL context
@@ -1559,4 +1612,273 @@ func DrawPolyLines(center Vector2, sides int32, radius float32, rotation float32
 // DrawPolyLinesEx - Draw a polygon outline of n sides with extended parameters
 func DrawPolyLinesEx(center Vector2, sides int32, radius float32, rotation float32, lineThick float32, col color.RGBA) {
 	drawPolyLinesEx.Call(nil, &center, &sides, &radius, &rotation, &lineThick, &col)
+}
+
+// DrawSplineLinear - Draw spline: Linear, minimum 2 points
+func DrawSplineLinear(points []Vector2, thick float32, col color.RGBA) {
+	pointCount := int32(len(points))
+	pointsPtr := unsafe.SliceData(points)
+	drawSplineLinear.Call(nil, &pointsPtr, &pointCount, &thick, &col)
+}
+
+// DrawSplineBasis - Draw spline: B-Spline, minimum 4 points
+func DrawSplineBasis(points []Vector2, thick float32, col color.RGBA) {
+	pointCount := int32(len(points))
+	pointsPtr := unsafe.SliceData(points)
+	drawSplineBasis.Call(nil, &pointsPtr, &pointCount, &thick, &col)
+}
+
+// DrawSplineCatmullRom - Draw spline: Catmull-Rom, minimum 4 points
+func DrawSplineCatmullRom(points []Vector2, thick float32, col color.RGBA) {
+	pointCount := int32(len(points))
+	pointsPtr := unsafe.SliceData(points)
+	drawSplineCatmullRom.Call(nil, &pointsPtr, &pointCount, &thick, &col)
+}
+
+// DrawSplineBezierQuadratic - Draw spline: Quadratic Bezier, minimum 3 points (1 control point): [p1, c2, p3, c4...]
+func DrawSplineBezierQuadratic(points []Vector2, thick float32, col color.RGBA) {
+	pointCount := int32(len(points))
+	pointsPtr := unsafe.SliceData(points)
+	drawSplineBezierQuadratic.Call(nil, &pointsPtr, &pointCount, &thick, &col)
+}
+
+// DrawSplineBezierCubic - Draw spline: Cubic Bezier, minimum 4 points (2 control points): [p1, c2, c3, p4, c5, c6...]
+func DrawSplineBezierCubic(points []Vector2, thick float32, col color.RGBA) {
+	pointCount := int32(len(points))
+	pointsPtr := unsafe.SliceData(points)
+	drawSplineBezierCubic.Call(nil, &pointsPtr, &pointCount, &thick, &col)
+}
+
+// DrawSplineSegmentLinear - Draw spline segment: Linear, 2 points
+func DrawSplineSegmentLinear(p1 Vector2, p2 Vector2, thick float32, col color.RGBA) {
+	drawSplineSegmentLinear.Call(nil, &p1, &p2, &thick, &col)
+}
+
+// DrawSplineSegmentBasis - Draw spline segment: B-Spline, 4 points
+func DrawSplineSegmentBasis(p1 Vector2, p2 Vector2, p3 Vector2, p4 Vector2, thick float32, col color.RGBA) {
+	drawSplineSegmentBasis.Call(nil, &p1, &p2, &p3, &p4, &thick, &col)
+}
+
+// DrawSplineSegmentCatmullRom - Draw spline segment: Catmull-Rom, 4 points
+func DrawSplineSegmentCatmullRom(p1 Vector2, p2 Vector2, p3 Vector2, p4 Vector2, thick float32, col color.RGBA) {
+	drawSplineSegmentCatmullRom.Call(nil, &p1, &p2, &p3, &p4, &thick, &col)
+}
+
+// DrawSplineSegmentBezierQuadratic - Draw spline segment: Quadratic Bezier, 2 points, 1 control point
+func DrawSplineSegmentBezierQuadratic(p1 Vector2, c2 Vector2, p3 Vector2, thick float32, col color.RGBA) {
+	drawSplineSegmentBezierQuadratic.Call(nil, &p1, &c2, &p3, &thick, &col)
+}
+
+// DrawSplineSegmentBezierCubic - Draw spline segment: Cubic Bezier, 2 points, 2 control points
+func DrawSplineSegmentBezierCubic(p1 Vector2, c2 Vector2, c3 Vector2, p4 Vector2, thick float32, col color.RGBA) {
+	drawSplineSegmentBezierCubic.Call(nil, &p1, &c2, &c3, &p4, &thick, &col)
+}
+
+// GetSplinePointLinear - Get (evaluate) spline point: Linear
+func GetSplinePointLinear(startPos Vector2, endPos Vector2, t float32) Vector2 {
+	var ret Vector2
+	getSplinePointLinear.Call(&ret, &startPos, &endPos, &t)
+	return ret
+}
+
+// GetSplinePointBasis - Get (evaluate) spline point: B-Spline
+func GetSplinePointBasis(p1 Vector2, p2 Vector2, p3 Vector2, p4 Vector2, t float32) Vector2 {
+	var ret Vector2
+	getSplinePointBasis.Call(&ret, &p1, &p2, &p3, &p4, &t)
+	return ret
+}
+
+// GetSplinePointCatmullRom - Get (evaluate) spline point: Catmull-Rom
+func GetSplinePointCatmullRom(p1 Vector2, p2 Vector2, p3 Vector2, p4 Vector2, t float32) Vector2 {
+	var ret Vector2
+	getSplinePointCatmullRom.Call(&ret, &p1, &p2, &p3, &p4, &t)
+	return ret
+}
+
+// GetSplinePointBezierQuad - Get (evaluate) spline point: Quadratic Bezier
+func GetSplinePointBezierQuad(p1 Vector2, c2 Vector2, p3 Vector2, t float32) Vector2 {
+	var ret Vector2
+	getSplinePointBezierQuad.Call(&ret, &p1, &c2, &p3, &t)
+	return ret
+}
+
+// GetSplinePointBezierCubic - Get (evaluate) spline point: Cubic Bezier
+func GetSplinePointBezierCubic(p1 Vector2, c2 Vector2, c3 Vector2, p4 Vector2, t float32) Vector2 {
+	var ret Vector2
+	getSplinePointBezierCubic.Call(&ret, &p1, &c2, &c3, &p4, &t)
+	return ret
+}
+
+// CheckCollisionRecs - Check collision between two rectangles
+func CheckCollisionRecs(rec1 Rectangle, rec2 Rectangle) bool {
+	var ret ffi.Arg
+	checkCollisionRecs.Call(&ret, &rec1, &rec2)
+	return ret.Bool()
+}
+
+// CheckCollisionCircles - Check collision between two circles
+func CheckCollisionCircles(center1 Vector2, radius1 float32, center2 Vector2, radius2 float32) bool {
+	var ret ffi.Arg
+	checkCollisionCircles.Call(&ret, &center1, &radius1, &center2, &radius2)
+	return ret.Bool()
+}
+
+// CheckCollisionCircleRec - Check collision between circle and rectangle
+func CheckCollisionCircleRec(center Vector2, radius float32, rec Rectangle) bool {
+	var ret ffi.Arg
+	checkCollisionCircleRec.Call(&ret, &center, &radius, &rec)
+	return ret.Bool()
+}
+
+// CheckCollisionCircleLine - Check if circle collides with a line created betweeen two points [p1] and [p2]
+func CheckCollisionCircleLine(center Vector2, radius float32, p1, p2 Vector2) bool {
+	var ret ffi.Arg
+	checkCollisionCircleLine.Call(&ret, &center, &radius, &p1, &p2)
+	return ret.Bool()
+}
+
+// CheckCollisionPointRec - Check if point is inside rectangle
+func CheckCollisionPointRec(point Vector2, rec Rectangle) bool {
+	var ret ffi.Arg
+	checkCollisionPointRec.Call(&ret, &point, &rec)
+	return ret.Bool()
+}
+
+// CheckCollisionPointCircle - Check if point is inside circle
+func CheckCollisionPointCircle(point Vector2, center Vector2, radius float32) bool {
+	var ret ffi.Arg
+	checkCollisionPointCircle.Call(&ret, &point, &center, &radius)
+	return ret.Bool()
+}
+
+// CheckCollisionPointTriangle - Check if point is inside a triangle
+func CheckCollisionPointTriangle(point Vector2, p1 Vector2, p2 Vector2, p3 Vector2) bool {
+	var ret ffi.Arg
+	checkCollisionPointTriangle.Call(&ret, &point, &p1, &p2, &p3)
+	return ret.Bool()
+}
+
+// CheckCollisionPointLine - Check if point belongs to line created between two points [p1] and [p2] with defined margin in pixels [threshold]
+func CheckCollisionPointLine(point Vector2, p1 Vector2, p2 Vector2, threshold int32) bool {
+	var ret ffi.Arg
+	checkCollisionPointLine.Call(&ret, &point, &p1, &p2, &threshold)
+	return ret.Bool()
+}
+
+// CheckCollisionPointPoly - Check if point is within a polygon described by array of vertices
+func CheckCollisionPointPoly(point Vector2, points []Vector2) bool {
+	var ret ffi.Arg
+	pointCount := int32(len(points))
+	pointsPtr := unsafe.SliceData(points)
+	checkCollisionPointPoly.Call(&ret, &point, &pointsPtr, &pointCount)
+	return ret.Bool()
+}
+
+// CheckCollisionLines - Check the collision between two lines defined by two points each, returns collision point by reference
+func CheckCollisionLines(startPos1 Vector2, endPos1 Vector2, startPos2 Vector2, endPos2 Vector2, collisionPoint *Vector2) bool {
+	var ret ffi.Arg
+	checkCollisionLines.Call(&ret, &startPos1, &endPos1, &startPos2, &endPos2, &collisionPoint)
+	return ret.Bool()
+}
+
+// GetCollisionRec - Get collision rectangle for two rectangles collision
+func GetCollisionRec(rec1 Rectangle, rec2 Rectangle) Rectangle {
+	var ret Rectangle
+	getCollisionRec.Call(&ret, &rec1, &rec2)
+	return ret
+}
+
+// LoadImage - Load image from file into CPU memory (RAM)
+func LoadImage(fileName string) *Image {
+	var ret Image
+	fileNamePtr := convert.ToBytePtr(fileName)
+	loadImage.Call(&ret, &fileNamePtr)
+	return &ret
+}
+
+// LoadImageRaw - Load image from RAW file data
+func LoadImageRaw(fileName string, width int32, height int32, format PixelFormat, headerSize int32) *Image {
+	var ret Image
+	fileNamePtr := convert.ToBytePtr(fileName)
+	loadImageRaw.Call(&ret, &fileNamePtr, &width, &height, &format, &headerSize)
+	return &ret
+}
+
+// LoadImageAnim - Load image sequence from file (frames appended to image.data)
+func LoadImageAnim(fileName string, frames *int32) *Image {
+	var ret Image
+	fileNamePtr := convert.ToBytePtr(fileName)
+	loadImageAnim.Call(&ret, &fileNamePtr, &frames)
+	return &ret
+}
+
+// LoadImageAnimFromMemory - Load image sequence from memory buffer
+func LoadImageAnimFromMemory(fileType string, fileData []byte, dataSize int32, frames *int32) *Image {
+	var ret Image
+	fileTypePtr := convert.ToBytePtr(fileType)
+	fileDataPtr := unsafe.SliceData(fileData)
+	loadImageAnimFromMemory.Call(&ret, &fileTypePtr, &fileDataPtr, &dataSize, &frames)
+	return &ret
+}
+
+// LoadImageFromMemory - Load image from memory buffer, fileType refers to extension: i.e. '.png'
+func LoadImageFromMemory(fileType string, fileData []byte, dataSize int32) *Image {
+	var ret Image
+	fileTypePtr := convert.ToBytePtr(fileType)
+	fileDataPtr := unsafe.SliceData(fileData)
+	loadImageFromMemory.Call(&ret, &fileTypePtr, &fileDataPtr, &dataSize)
+	return &ret
+}
+
+// LoadImageFromTexture - Load image from GPU texture data
+func LoadImageFromTexture(texture Texture2D) *Image {
+	var ret Image
+	loadImageFromTexture.Call(&ret, &texture)
+	return &ret
+}
+
+// LoadImageFromScreen - Load image from screen buffer and (screenshot)
+func LoadImageFromScreen() *Image {
+	var ret Image
+	loadImageFromScreen.Call(&ret)
+	return &ret
+}
+
+// IsImageValid - Check if an image is valid (data and parameters)
+func IsImageValid(image *Image) bool {
+	var ret ffi.Arg
+	isImageValid.Call(&ret, image)
+	return ret.Bool()
+}
+
+// UnloadImage - Unload image from CPU memory (RAM)
+func UnloadImage(image *Image) {
+	unloadImage.Call(nil, image)
+}
+
+// ExportImage - Export image data to file, returns true on success
+func ExportImage(image Image, fileName string) bool {
+	var ret ffi.Arg
+	fileNamePtr := convert.ToBytePtr(fileName)
+	exportImage.Call(&ret, &image, &fileNamePtr)
+	return ret.Bool()
+}
+
+// ExportImageToMemory - Export image to memory buffer
+//
+// The returned memory is a Go-managed slice. It doesn't need to be freed.
+func ExportImageToMemory(image Image, fileType string) []byte {
+	var ret *byte
+	fileTypePtr := convert.ToBytePtr(fileType)
+	var fileSize int32
+	fileSizePtr := &fileSize
+	exportImageToMemory.Call(&ret, &image, &fileTypePtr, &fileSizePtr)
+	defer memFree.Call(nil, &ret) // free the memory
+
+	if ret == nil {
+		return nil
+	}
+	result := make([]byte, fileSize)
+	copy(result, unsafe.Slice(ret, fileSize))
+	return result
 }
