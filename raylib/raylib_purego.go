@@ -823,7 +823,7 @@ func IsCursorOnScreen() bool {
 
 // ClearBackground - Set background color (framebuffer clear color)
 func ClearBackground(col color.RGBA) {
-	clearBackground.Call(nil, col)
+	clearBackground.Call(nil, &col)
 }
 
 // BeginDrawing - Setup canvas (framebuffer) to start drawing
