@@ -455,6 +455,19 @@ var (
 	getPixelColor       = dll.MustPrep("GetPixelColor", &typeColor, &ffi.TypePointer, &ffi.TypeSint32)
 	setPixelColor       = dll.MustPrep("SetPixelColor", &ffi.TypeVoid, &ffi.TypePointer, &typeColor, &ffi.TypeSint32)
 	getPixelDataSize    = dll.MustPrep("GetPixelDataSize", &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32)
+
+	// Font loading/unloading functions
+
+	getFontDefault     = dll.MustPrep("GetFontDefault", &typeFont)
+	loadFont           = dll.MustPrep("LoadFont", &typeFont, &ffi.TypePointer)
+	loadFontEx         = dll.MustPrep("LoadFontEx", &typeFont, &ffi.TypePointer, &ffi.TypeSint32, &ffi.TypePointer, &ffi.TypeSint32)
+	loadFontFromImage  = dll.MustPrep("LoadFontFromImage", &typeFont, &typeImage, &typeColor, &ffi.TypeSint32)
+	loadFontFromMemory = dll.MustPrep("LoadFontFromMemory", &typeFont, &ffi.TypePointer, &ffi.TypePointer, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypePointer, &ffi.TypeSint32)
+	isFontValid        = dll.MustPrep("IsFontValid", &ffi.TypeUint8, &typeFont)
+	loadFontData       = dll.MustPrep("LoadFontData", &ffi.TypePointer, &ffi.TypePointer, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypePointer, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypePointer)
+	genImageFontAtlas  = dll.MustPrep("GenImageFontAtlas", &typeImage, &ffi.TypePointer, &ffi.TypePointer, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32)
+	unloadFontData     = dll.MustPrep("UnloadFontData", &ffi.TypeVoid, &ffi.TypePointer, &ffi.TypeSint32)
+	unloadFont         = dll.MustPrep("UnloadFont", &ffi.TypeVoid, &typeFont)
 )
 
 // InitWindow - Initialize window and OpenGL context
@@ -2640,4 +2653,105 @@ func GetPixelDataSize(width int32, height int32, format int32) int32 {
 	var ret ffi.Arg
 	getPixelDataSize.Call(&ret, &width, &height, &format)
 	return int32(ret)
+}
+
+// GetFontDefault - Get the default Font
+func GetFontDefault() Font {
+	var ret Font
+	getFontDefault.Call(&ret)
+	return ret
+}
+
+// LoadFont - Load font from file into GPU memory (VRAM)
+func LoadFont(fileName string) Font {
+	var ret Font
+	fileNamePtr := convert.ToBytePtr(fileName)
+	loadFont.Call(&ret, &fileNamePtr)
+	return ret
+}
+
+// LoadFontEx - Load Font from file with extended parameters.
+// Use nil for fontChars and 0 for runesNumber to load the default character set.
+// Font size is provided in pixels height.
+func LoadFontEx(fileName string, fontSize int32, fontChars []rune, runesNumber ...int32) Font {
+	var ret Font
+	fileNamePtr := convert.ToBytePtr(fileName)
+	var charsCount int32
+	var fontCharsPtr *rune
+	if fontChars != nil {
+		fontCharsPtr = unsafe.SliceData(fontChars)
+		charsCount = int32(len(fontChars))
+	} else {
+		if len(runesNumber) > 0 {
+			charsCount = int32(runesNumber[0])
+		}
+	}
+
+	loadFontEx.Call(&ret, &fileNamePtr, &fontSize, &fontCharsPtr, &charsCount)
+	return ret
+}
+
+// LoadFontFromImage - Load font from Image (XNA style)
+func LoadFontFromImage(image Image, key color.RGBA, firstChar rune) Font {
+	var ret Font
+	loadFontFromImage.Call(&ret, &image, &key, &firstChar)
+	return ret
+}
+
+// LoadFontFromMemory - Load font from memory buffer, fileType refers to extension: i.e. '.ttf'
+func LoadFontFromMemory(fileType string, fileData []byte, fontSize int32, codepoints []rune) Font {
+	var ret Font
+	dataSize := int32(len(fileData))
+	fileDataPtr := unsafe.SliceData(fileData)
+	codepointCount := int32(len(codepoints))
+	codepointsPtr := unsafe.SliceData(codepoints)
+	fileTypePtr := convert.ToBytePtr(fileType)
+	loadFontFromMemory.Call(&ret, &fileTypePtr, &fileDataPtr, &dataSize, &fontSize, &codepointsPtr, &codepointCount)
+	return ret
+}
+
+// IsFontValid - Check if a font is valid (font data loaded, WARNING: GPU texture not checked)
+func IsFontValid(font Font) bool {
+	var ret ffi.Arg
+	isFontValid.Call(&ret, &font)
+	return ret.Bool()
+}
+
+// LoadFontData - Load font data for further use
+func LoadFontData(fileData []byte, fontSize int32, codepoints []rune, codepointCount, typ int32) []GlyphInfo {
+	dataSize := int32(len(fileData))
+	fileDataPtr := unsafe.SliceData(fileData)
+	if codepointCount < 0 {
+		codepointCount = 0
+	}
+	codepointsPtr := unsafe.SliceData(codepoints)
+	var glyphCount int32
+	var ret *GlyphInfo
+	loadFontData.Call(&ret, &fileDataPtr, &dataSize, &fontSize, &codepointsPtr, &codepointCount, &typ, &glyphCount)
+	if ret == nil || glyphCount <= 0 {
+		return nil
+	}
+	return unsafe.Slice(ret, glyphCount)
+}
+
+// GenImageFontAtlas - Generate image font atlas using chars info
+func GenImageFontAtlas(glyphs []GlyphInfo, glyphRecs []*Rectangle, fontSize int32, padding int32, packMethod int32) Image {
+	var ret Image
+	glyphCount := int32(len(glyphs))
+	glyphsPtr := unsafe.SliceData(glyphs)
+	glyphRecsPtr := unsafe.SliceData(glyphRecs)
+	genImageFontAtlas.Call(&ret, &glyphsPtr, &glyphRecsPtr, &glyphCount, &fontSize, &padding, &packMethod)
+	return ret
+}
+
+// UnloadFontData - Unload font chars info data (RAM)
+func UnloadFontData(glyphs []GlyphInfo) {
+	glyphCount := int32(len(glyphs))
+	glyphsPtr := unsafe.SliceData(glyphs)
+	unloadFontData.Call(nil, &glyphsPtr, &glyphCount)
+}
+
+// UnloadFont - Unload font from GPU memory (VRAM)
+func UnloadFont(font Font) {
+	unloadFont.Call(nil, &font)
 }
