@@ -382,6 +382,31 @@ var (
 	unloadImagePalette     = dll.MustPrep("UnloadImagePalette", &ffi.TypeVoid, &ffi.TypePointer)
 	getImageAlphaBorder    = dll.MustPrep("GetImageAlphaBorder", &typeRectangle, &typeImage, &ffi.TypeFloat)
 	getImageColor          = dll.MustPrep("GetImageColor", &typeColor, &typeImage, &ffi.TypeSint32, &ffi.TypeSint32)
+
+	// Image drawing functions
+
+	imageClearBackground    = dll.MustPrep("ImageClearBackground", &ffi.TypeVoid, &ffi.TypePointer, &typeColor)
+	imageDrawPixel          = dll.MustPrep("ImageDrawPixel", &ffi.TypeVoid, &ffi.TypePointer, &ffi.TypeSint32, &ffi.TypeSint32, &typeColor)
+	imageDrawPixelV         = dll.MustPrep("ImageDrawPixelV", &ffi.TypeVoid, &ffi.TypePointer, &typeVector2, &typeColor)
+	imageDrawLine           = dll.MustPrep("ImageDrawLine", &ffi.TypeVoid, &ffi.TypePointer, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32, &typeColor)
+	imageDrawLineV          = dll.MustPrep("ImageDrawLineV", &ffi.TypeVoid, &ffi.TypePointer, &typeVector2, &typeVector2, &typeColor)
+	imageDrawLineEx         = dll.MustPrep("ImageDrawLineEx", &ffi.TypeVoid, &ffi.TypePointer, &typeVector2, &typeVector2, &ffi.TypeSint32, &typeColor)
+	imageDrawCircle         = dll.MustPrep("ImageDrawCircle", &ffi.TypeVoid, &ffi.TypePointer, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32, &typeColor)
+	imageDrawCircleV        = dll.MustPrep("ImageDrawCircleV", &ffi.TypeVoid, &ffi.TypePointer, &typeVector2, &ffi.TypeSint32, &typeColor)
+	imageDrawCircleLines    = dll.MustPrep("ImageDrawCircleLines", &ffi.TypeVoid, &ffi.TypePointer, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32, &typeColor)
+	imageDrawCircleLinesV   = dll.MustPrep("ImageDrawCircleLinesV", &ffi.TypeVoid, &ffi.TypePointer, &typeVector2, &ffi.TypeSint32, &typeColor)
+	imageDrawRectangle      = dll.MustPrep("ImageDrawRectangle", &ffi.TypeVoid, &ffi.TypePointer, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32, &typeColor)
+	imageDrawRectangleV     = dll.MustPrep("ImageDrawRectangleV", &ffi.TypeVoid, &ffi.TypePointer, &typeVector2, &typeVector2, &typeColor)
+	imageDrawRectangleRec   = dll.MustPrep("ImageDrawRectangleRec", &ffi.TypeVoid, &ffi.TypePointer, &typeRectangle, &typeColor)
+	imageDrawRectangleLines = dll.MustPrep("ImageDrawRectangleLines", &ffi.TypeVoid, &ffi.TypePointer, &typeRectangle, &ffi.TypeSint32, &typeColor)
+	imageDrawTriangle       = dll.MustPrep("ImageDrawTriangle", &ffi.TypeVoid, &ffi.TypePointer, &typeVector2, &typeVector2, &typeVector2, &typeColor)
+	imageDrawTriangleEx     = dll.MustPrep("ImageDrawTriangleEx", &ffi.TypeVoid, &ffi.TypePointer, &typeVector2, &typeVector2, &typeVector2, &typeColor, &typeColor, &typeColor)
+	imageDrawTriangleLines  = dll.MustPrep("ImageDrawTriangleLines", &ffi.TypeVoid, &ffi.TypePointer, &typeVector2, &typeVector2, &typeVector2, &typeColor)
+	imageDrawTriangleFan    = dll.MustPrep("ImageDrawTriangleFan", &ffi.TypeVoid, &ffi.TypePointer, &ffi.TypePointer, &ffi.TypeSint32, &typeColor)
+	imageDrawTriangleStrip  = dll.MustPrep("ImageDrawTriangleStrip", &ffi.TypeVoid, &ffi.TypePointer, &ffi.TypePointer, &ffi.TypeSint32, &typeColor)
+	imageDraw               = dll.MustPrep("ImageDraw", &ffi.TypeVoid, &ffi.TypePointer, &typeImage, &typeRectangle, &typeRectangle, &typeColor)
+	imageDrawText           = dll.MustPrep("ImageDrawText", &ffi.TypeVoid, &ffi.TypePointer, &ffi.TypePointer, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32, &typeColor)
+	imageDrawTextEx         = dll.MustPrep("ImageDrawTextEx", &ffi.TypeVoid, &ffi.TypePointer, &typeFont, &ffi.TypePointer, &typeVector2, &ffi.TypeFloat, &ffi.TypeFloat, &typeColor)
 )
 
 // InitWindow - Initialize window and OpenGL context
@@ -2214,4 +2239,121 @@ func GetImageColor(image Image, x int32, y int32) color.RGBA {
 	var ret color.RGBA
 	getImageColor.Call(&ret, &image, &x, &y)
 	return ret
+}
+
+// ImageClearBackground - Clear image background with given color
+func ImageClearBackground(dst *Image, col color.RGBA) {
+	imageClearBackground.Call(nil, &dst, &col)
+}
+
+// ImageDrawPixel - Draw pixel within an image
+func ImageDrawPixel(dst *Image, posX int32, posY int32, col color.RGBA) {
+	imageDrawPixel.Call(nil, &dst, &posX, &posY, &col)
+}
+
+// ImageDrawPixelV - Draw pixel within an image (Vector version)
+func ImageDrawPixelV(dst *Image, position Vector2, col color.RGBA) {
+	imageDrawPixelV.Call(nil, &dst, &position, &col)
+}
+
+// ImageDrawLine - Draw line within an image
+func ImageDrawLine(dst *Image, startPosX int32, startPosY int32, endPosX int32, endPosY int32, col color.RGBA) {
+	imageDrawLine.Call(nil, &dst, &startPosX, &startPosY, &endPosX, &endPosY, &col)
+}
+
+// ImageDrawLineV - Draw line within an image (Vector version)
+func ImageDrawLineV(dst *Image, start, end Vector2, col color.RGBA) {
+	imageDrawLineV.Call(nil, &dst, &start, &end, &col)
+}
+
+// ImageDrawLineEx - Draw a line defining thickness within an image
+func ImageDrawLineEx(dst *Image, start, end Vector2, thick int32, col color.RGBA) {
+	imageDrawLineEx.Call(nil, &dst, &start, &end, &thick, &col)
+}
+
+// ImageDrawCircle - Draw a filled circle within an image
+func ImageDrawCircle(dst *Image, centerX int32, centerY int32, radius int32, col color.RGBA) {
+	imageDrawCircle.Call(nil, &dst, &centerX, &centerY, &radius, &col)
+}
+
+// ImageDrawCircleV - Draw a filled circle within an image (Vector version)
+func ImageDrawCircleV(dst *Image, center Vector2, radius int32, col color.RGBA) {
+	imageDrawCircleV.Call(nil, &dst, &center, &radius, &col)
+}
+
+// ImageDrawCircleLines - Draw circle outline within an image
+func ImageDrawCircleLines(dst *Image, centerX int32, centerY int32, radius int32, col color.RGBA) {
+	imageDrawCircleLines.Call(nil, &dst, &centerX, &centerY, &radius, &col)
+}
+
+// ImageDrawCircleLinesV - Draw circle outline within an image (Vector version)
+func ImageDrawCircleLinesV(dst *Image, center Vector2, radius int32, col color.RGBA) {
+	imageDrawCircleLinesV.Call(nil, &dst, &center, &radius, &col)
+}
+
+// ImageDrawRectangle - Draw rectangle within an image
+func ImageDrawRectangle(dst *Image, posX int32, posY int32, width int32, height int32, col color.RGBA) {
+	imageDrawRectangle.Call(nil, &dst, &posX, &posY, &width, &height, &col)
+}
+
+// ImageDrawRectangleV - Draw rectangle within an image (Vector version)
+func ImageDrawRectangleV(dst *Image, position Vector2, size Vector2, col color.RGBA) {
+	imageDrawRectangleV.Call(nil, &dst, &position, &size, &col)
+}
+
+// ImageDrawRectangleRec - Draw rectangle within an image
+func ImageDrawRectangleRec(dst *Image, rec Rectangle, col color.RGBA) {
+	imageDrawRectangleRec.Call(nil, &dst, &rec, &col)
+}
+
+// ImageDrawRectangleLines - Draw rectangle lines within an image
+func ImageDrawRectangleLines(dst *Image, rec Rectangle, thick int, col color.RGBA) {
+	t := int32(thick)
+	imageDrawRectangleLines.Call(nil, &dst, &rec, &t, &col)
+}
+
+// ImageDrawTriangle - Draw triangle within an image
+func ImageDrawTriangle(dst *Image, v1, v2, v3 Vector2, col color.RGBA) {
+	imageDrawTriangle.Call(nil, &dst, &v1, &v2, &v3, &col)
+}
+
+// ImageDrawTriangleEx - Draw triangle with interpolated colors within an image
+func ImageDrawTriangleEx(dst *Image, v1, v2, v3 Vector2, c1, c2, c3 color.RGBA) {
+	imageDrawTriangleEx.Call(nil, &dst, &v1, &v2, &v3, &c1, &c2, &c3)
+}
+
+// ImageDrawTriangleLines - Draw triangle outline within an image
+func ImageDrawTriangleLines(dst *Image, v1, v2, v3 Vector2, col color.RGBA) {
+	imageDrawTriangleLines.Call(nil, &dst, &v1, &v2, &v3, &col)
+}
+
+// ImageDrawTriangleFan - Draw a triangle fan defined by points within an image (first vertex is the center)
+func ImageDrawTriangleFan(dst *Image, points []Vector2, col color.RGBA) {
+	pointCount := int32(len(points))
+	pointsPtr := unsafe.SliceData(points)
+	imageDrawTriangleFan.Call(nil, &dst, &pointsPtr, &pointCount, &col)
+}
+
+// ImageDrawTriangleStrip - Draw a triangle strip defined by points within an image
+func ImageDrawTriangleStrip(dst *Image, points []Vector2, col color.RGBA) {
+	pointCount := int32(len(points))
+	pointsPtr := unsafe.SliceData(points)
+	imageDrawTriangleStrip.Call(nil, &dst, &pointsPtr, &pointCount, &col)
+}
+
+// ImageDraw - Draw a source image within a destination image (tint applied to source)
+func ImageDraw(dst *Image, src *Image, srcRec Rectangle, dstRec Rectangle, tint color.RGBA) {
+	imageDraw.Call(nil, &dst, src, &srcRec, &dstRec, &tint)
+}
+
+// ImageDrawText - Draw text (using default font) within an image (destination)
+func ImageDrawText(dst *Image, posX int32, posY int32, text string, fontSize int32, col color.RGBA) {
+	textPtr := convert.ToBytePtr(text)
+	imageDrawText.Call(nil, &dst, &textPtr, &posX, &posY, &fontSize, &col)
+}
+
+// ImageDrawTextEx - Draw text (custom sprite font) within an image (destination)
+func ImageDrawTextEx(dst *Image, position Vector2, font Font, text string, fontSize float32, spacing float32, tint color.RGBA) {
+	textPtr := convert.ToBytePtr(text)
+	imageDrawTextEx.Call(nil, &dst, &font, &textPtr, &position, &fontSize, &spacing, &tint)
 }
