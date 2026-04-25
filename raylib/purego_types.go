@@ -9,6 +9,7 @@ var typeTexture2D = ffi.NewType(&ffi.TypeUint32, &ffi.TypeSint32, &ffi.TypeSint3
 var typeImage = ffi.NewType(&ffi.TypePointer, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32)
 var typeVector2 = ffi.NewType(&ffi.TypeFloat, &ffi.TypeFloat)
 var typeVector3 = ffi.NewType(&ffi.TypeFloat, &ffi.TypeFloat, &ffi.TypeFloat)
+var typeVector4 = ffi.NewType(&ffi.TypeFloat, &ffi.TypeFloat, &ffi.TypeFloat, &ffi.TypeFloat)
 var typeColor = ffi.NewType(&ffi.TypeUint8, &ffi.TypeUint8, &ffi.TypeUint8, &ffi.TypeUint8)
 var typeCamera2D = ffi.NewType(&typeVector2, &typeVector2, &ffi.TypeFloat, &ffi.TypeFloat)
 var typeCamera3D = ffi.NewType(&typeVector3, &typeVector3, &typeVector3, &ffi.TypeFloat, &ffi.TypeSint32)
@@ -51,4 +52,12 @@ var typeFont = ffi.NewType(
 	&typeTexture2D,
 	&ffi.TypePointer,
 	&ffi.TypePointer,
+)
+var typeNPatchInfo = ffi.NewType(
+	&typeRectangle,
+	&ffi.TypeSint32,
+	&ffi.TypeSint32,
+	&ffi.TypeSint32,
+	&ffi.TypeSint32,
+	&ffi.TypeSint32,
 )

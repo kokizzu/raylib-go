@@ -421,6 +421,40 @@ var (
 	unloadRenderTexture  = dll.MustPrep("UnloadRenderTexture", &ffi.TypeVoid, &typeRenderTexture2D)
 	updateTexture        = dll.MustPrep("UpdateTexture", &ffi.TypeVoid, &typeTexture2D, &ffi.TypePointer)
 	updateTextureRec     = dll.MustPrep("UpdateTextureRec", &ffi.TypeVoid, &typeTexture2D, &typeRectangle, &ffi.TypePointer)
+
+	// Texture configuration functions
+
+	genTextureMipmaps = dll.MustPrep("GenTextureMipmaps", &ffi.TypeVoid, &ffi.TypePointer)
+	setTextureFilter  = dll.MustPrep("SetTextureFilter", &ffi.TypeVoid, &typeTexture2D, &ffi.TypeSint32)
+	setTextureWrap    = dll.MustPrep("SetTextureWrap", &ffi.TypeVoid, &typeTexture2D, &ffi.TypeSint32)
+
+	// Texture drawing functions
+
+	drawTexture       = dll.MustPrep("DrawTexture", &ffi.TypeVoid, &typeTexture2D, &ffi.TypeSint32, &ffi.TypeSint32, &typeColor)
+	drawTextureV      = dll.MustPrep("DrawTextureV", &ffi.TypeVoid, &typeTexture2D, &typeVector2, &typeColor)
+	drawTextureEx     = dll.MustPrep("DrawTextureEx", &ffi.TypeVoid, &typeTexture2D, &typeVector2, &ffi.TypeFloat, &ffi.TypeFloat, &typeColor)
+	drawTextureRec    = dll.MustPrep("DrawTextureRec", &ffi.TypeVoid, &typeTexture2D, &typeRectangle, &typeVector2, &typeColor)
+	drawTexturePro    = dll.MustPrep("DrawTexturePro", &ffi.TypeVoid, &typeTexture2D, &typeRectangle, &typeRectangle, &typeVector2, &ffi.TypeFloat, &typeColor)
+	drawTextureNPatch = dll.MustPrep("DrawTextureNPatch", &ffi.TypeVoid, &typeTexture2D, &typeNPatchInfo, &typeRectangle, &typeVector2, &ffi.TypeFloat, &typeColor)
+
+	// Color/pixel related functions
+
+	fade                = dll.MustPrep("Fade", &typeColor, &typeColor, &ffi.TypeFloat)
+	colorToInt          = dll.MustPrep("ColorToInt", &ffi.TypeSint32, &typeColor)
+	colorNormalize      = dll.MustPrep("ColorNormalize", &typeVector4, &typeColor)
+	colorFromNormalized = dll.MustPrep("ColorFromNormalized", &typeColor, &typeVector4)
+	colorToHSV          = dll.MustPrep("ColorToHSV", &typeVector3, &typeColor)
+	colorFromHSV        = dll.MustPrep("ColorFromHSV", &typeColor, &ffi.TypeFloat, &ffi.TypeFloat, &ffi.TypeFloat)
+	colorTint           = dll.MustPrep("ColorTint", &typeColor, &typeColor, &typeColor)
+	colorBrightness     = dll.MustPrep("ColorBrightness", &typeColor, &typeColor, &ffi.TypeFloat)
+	colorContrast       = dll.MustPrep("ColorContrast", &typeColor, &typeColor, &ffi.TypeFloat)
+	colorAlpha          = dll.MustPrep("ColorAlpha", &typeColor, &typeColor, &ffi.TypeFloat)
+	colorAlphaBlend     = dll.MustPrep("ColorAlphaBlend", &typeColor, &typeColor, &typeColor, &typeColor)
+	colorLerp           = dll.MustPrep("ColorLerp", &typeColor, &typeColor, &typeColor, &ffi.TypeFloat)
+	getColor            = dll.MustPrep("GetColor", &typeColor, &ffi.TypeUint32)
+	getPixelColor       = dll.MustPrep("GetPixelColor", &typeColor, &ffi.TypePointer, &ffi.TypeSint32)
+	setPixelColor       = dll.MustPrep("SetPixelColor", &ffi.TypeVoid, &ffi.TypePointer, &typeColor, &ffi.TypeSint32)
+	getPixelDataSize    = dll.MustPrep("GetPixelDataSize", &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32)
 )
 
 // InitWindow - Initialize window and OpenGL context
@@ -2451,4 +2485,159 @@ func UpdateTextureRec(texture Texture2D, rec Rectangle, pixels any) {
 		cpixels = unsafe.Pointer(&p[0])
 	}
 	updateTextureRec.Call(nil, &texture, &rec, &cpixels)
+}
+
+// GenTextureMipmaps - Generate GPU mipmaps for a texture
+func GenTextureMipmaps(texture *Texture2D) {
+	genTextureMipmaps.Call(nil, &texture)
+}
+
+// SetTextureFilter - Set texture scaling filter mode
+func SetTextureFilter(texture Texture2D, filter TextureFilterMode) {
+	setTextureFilter.Call(nil, &texture, &filter)
+}
+
+// SetTextureWrap - Set texture wrapping mode
+func SetTextureWrap(texture Texture2D, wrap TextureWrapMode) {
+	setTextureWrap.Call(nil, &texture, &wrap)
+}
+
+// DrawTexture - Draw a Texture2D
+func DrawTexture(texture Texture2D, posX int32, posY int32, tint color.RGBA) {
+	drawTexture.Call(nil, &texture, &posX, &posY, &tint)
+}
+
+// DrawTextureV - Draw a Texture2D with position defined as Vector2
+func DrawTextureV(texture Texture2D, position Vector2, tint color.RGBA) {
+	drawTextureV.Call(nil, &texture, &position, &tint)
+}
+
+// DrawTextureEx - Draw a Texture2D with extended parameters
+func DrawTextureEx(texture Texture2D, position Vector2, rotation float32, scale float32, tint color.RGBA) {
+	drawTextureEx.Call(nil, &texture, &position, &rotation, &scale, &tint)
+}
+
+// DrawTextureRec - Draw a part of a texture defined by a rectangle
+func DrawTextureRec(texture Texture2D, source Rectangle, position Vector2, tint color.RGBA) {
+	drawTextureRec.Call(nil, &texture, &source, &position, &tint)
+}
+
+// DrawTexturePro - Draw a part of a texture defined by a rectangle with 'pro' parameters
+func DrawTexturePro(texture Texture2D, source Rectangle, dest Rectangle, origin Vector2, rotation float32, tint color.RGBA) {
+	drawTexturePro.Call(nil, &texture, &source, &dest, &origin, &rotation, &tint)
+}
+
+// DrawTextureNPatch - Draws a texture (or part of it) that stretches or shrinks nicely
+func DrawTextureNPatch(texture Texture2D, nPatchInfo NPatchInfo, dest Rectangle, origin Vector2, rotation float32, tint color.RGBA) {
+	drawTextureNPatch.Call(nil, &texture, &nPatchInfo, &dest, &origin, &rotation, &tint)
+}
+
+// Fade - Get color with alpha applied, alpha goes from 0.0f to 1.0f
+func Fade(col color.RGBA, alpha float32) color.RGBA {
+	var ret color.RGBA
+	fade.Call(&ret, &col, &alpha)
+	return ret
+}
+
+// ColorToInt - Get hexadecimal value for a Color (0xRRGGBBAA)
+func ColorToInt(col color.RGBA) int32 {
+	var ret ffi.Arg
+	colorToInt.Call(&ret, &col)
+	return int32(ret)
+}
+
+// ColorNormalize - Get Color normalized as float [0..1]
+func ColorNormalize(col color.RGBA) Vector4 {
+	var ret Vector4
+	colorNormalize.Call(&ret, &col)
+	return ret
+}
+
+// ColorFromNormalized - Get Color from normalized values [0..1]
+func ColorFromNormalized(normalized Vector4) color.RGBA {
+	var ret color.RGBA
+	colorFromNormalized.Call(&ret, &normalized)
+	return ret
+}
+
+// ColorToHSV - Get HSV values for a Color, hue [0..360], saturation/value [0..1]
+func ColorToHSV(col color.RGBA) Vector3 {
+	var ret Vector3
+	colorToHSV.Call(&ret, &col)
+	return ret
+}
+
+// ColorFromHSV - Get a Color from HSV values, hue [0..360], saturation/value [0..1]
+func ColorFromHSV(hue float32, saturation float32, value float32) color.RGBA {
+	var ret color.RGBA
+	colorFromHSV.Call(&ret, &hue, &saturation, &value)
+	return ret
+}
+
+// ColorTint - Get color multiplied with another color
+func ColorTint(col color.RGBA, tint color.RGBA) color.RGBA {
+	var ret color.RGBA
+	colorTint.Call(&ret, &col, &tint)
+	return ret
+}
+
+// ColorBrightness - Get color with brightness correction, brightness factor goes from -1.0f to 1.0f
+func ColorBrightness(col color.RGBA, factor float32) color.RGBA {
+	var ret color.RGBA
+	colorBrightness.Call(&ret, &col, &factor)
+	return ret
+}
+
+// ColorContrast - Get color with contrast correction, contrast values between -1.0f and 1.0f
+func ColorContrast(col color.RGBA, contrast float32) color.RGBA {
+	var ret color.RGBA
+	colorContrast.Call(&ret, &col, &contrast)
+	return ret
+}
+
+// ColorAlpha - Get color with alpha applied, alpha goes from 0.0f to 1.0f
+func ColorAlpha(col color.RGBA, alpha float32) color.RGBA {
+	var ret color.RGBA
+	colorAlpha.Call(&ret, &col, &alpha)
+	return ret
+}
+
+// ColorAlphaBlend - Get src alpha-blended into dst color with tint
+func ColorAlphaBlend(dst color.RGBA, src color.RGBA, tint color.RGBA) color.RGBA {
+	var ret color.RGBA
+	colorAlphaBlend.Call(&ret, &dst, &src, &tint)
+	return ret
+}
+
+// ColorLerp - Get color lerp interpolation between two colors, factor [0.0f..1.0f]
+func ColorLerp(col1, col2 color.RGBA, factor float32) color.RGBA {
+	var ret color.RGBA
+	colorLerp.Call(&ret, &col1, &col2, &factor)
+	return ret
+}
+
+// GetColor - Get Color structure from hexadecimal value
+func GetColor(hexValue uint) color.RGBA {
+	var ret color.RGBA
+	getColor.Call(&ret, &hexValue)
+	return ret
+}
+
+// GetPixelColor - Get Color from a source pixel pointer of certain format
+func GetPixelColor(srcPtr unsafe.Pointer, format int32) color.RGBA {
+	var ret color.RGBA
+	getPixelColor.Call(&ret, &srcPtr, &format)
+	return ret
+}
+
+// SetPixelColor - Set color formatted into destination pixel pointer
+func SetPixelColor(dstPtr unsafe.Pointer, col color.RGBA, format int32) {
+	setPixelColor.Call(nil, &dstPtr, &col, &format)
+}
+
+// GetPixelDataSize - Get pixel data size in bytes for certain format
+func GetPixelDataSize(width int32, height int32, format int32) int32 {
+	var ret ffi.Arg
+	getPixelDataSize.Call(&ret, &width, &height, &format)
+	return int32(ret)
 }
