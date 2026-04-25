@@ -5,6 +5,7 @@ package rl
 
 import (
 	"fmt"
+	"image"
 	"image/color"
 	"unsafe"
 
@@ -407,6 +408,19 @@ var (
 	imageDraw               = dll.MustPrep("ImageDraw", &ffi.TypeVoid, &ffi.TypePointer, &typeImage, &typeRectangle, &typeRectangle, &typeColor)
 	imageDrawText           = dll.MustPrep("ImageDrawText", &ffi.TypeVoid, &ffi.TypePointer, &ffi.TypePointer, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32, &typeColor)
 	imageDrawTextEx         = dll.MustPrep("ImageDrawTextEx", &ffi.TypeVoid, &ffi.TypePointer, &typeFont, &ffi.TypePointer, &typeVector2, &ffi.TypeFloat, &ffi.TypeFloat, &typeColor)
+
+	// Texture loading functions
+
+	loadTexture          = dll.MustPrep("LoadTexture", &typeTexture2D, &ffi.TypePointer)
+	loadTextureFromImage = dll.MustPrep("LoadTextureFromImage", &typeTexture2D, &typeImage)
+	loadTextureCubemap   = dll.MustPrep("LoadTextureCubemap", &typeTexture2D, &typeImage, &ffi.TypeSint32)
+	loadRenderTexture    = dll.MustPrep("LoadRenderTexture", &typeRenderTexture2D, &ffi.TypeSint32, &ffi.TypeSint32)
+	isTextureValid       = dll.MustPrep("IsTextureValid", &ffi.TypeUint8, &typeTexture2D)
+	unloadTexture        = dll.MustPrep("UnloadTexture", &ffi.TypeVoid, &typeTexture2D)
+	isRenderTextureValid = dll.MustPrep("IsRenderTextureValid", &ffi.TypeUint8, &typeRenderTexture2D)
+	unloadRenderTexture  = dll.MustPrep("UnloadRenderTexture", &ffi.TypeVoid, &typeRenderTexture2D)
+	updateTexture        = dll.MustPrep("UpdateTexture", &ffi.TypeVoid, &typeTexture2D, &ffi.TypePointer)
+	updateTextureRec     = dll.MustPrep("UpdateTextureRec", &ffi.TypeVoid, &typeTexture2D, &typeRectangle, &ffi.TypePointer)
 )
 
 // InitWindow - Initialize window and OpenGL context
@@ -2356,4 +2370,85 @@ func ImageDrawText(dst *Image, posX int32, posY int32, text string, fontSize int
 func ImageDrawTextEx(dst *Image, position Vector2, font Font, text string, fontSize float32, spacing float32, tint color.RGBA) {
 	textPtr := convert.ToBytePtr(text)
 	imageDrawTextEx.Call(nil, &dst, &font, &textPtr, &position, &fontSize, &spacing, &tint)
+}
+
+// LoadTexture - Load texture from file into GPU memory (VRAM)
+func LoadTexture(fileName string) Texture2D {
+	var ret Texture2D
+	fileNamePtr := convert.ToBytePtr(fileName)
+	loadTexture.Call(&ret, &fileNamePtr)
+	return ret
+}
+
+// LoadTextureFromImage - Load texture from image data
+func LoadTextureFromImage(image *Image) Texture2D {
+	var ret Texture2D
+	loadTextureFromImage.Call(&ret, image)
+	return ret
+}
+
+// LoadTextureCubemap - Load cubemap from image, multiple image cubemap layouts supported
+func LoadTextureCubemap(image *Image, layout int32) Texture2D {
+	var ret Texture2D
+	loadTextureCubemap.Call(&ret, image, &layout)
+	return ret
+}
+
+// LoadRenderTexture - Load texture for rendering (framebuffer)
+func LoadRenderTexture(width int32, height int32) RenderTexture2D {
+	var ret RenderTexture2D
+	loadRenderTexture.Call(&ret, &width, &height)
+	return ret
+}
+
+// IsTextureValid - Check if a texture is valid (loaded in GPU)
+func IsTextureValid(texture Texture2D) bool {
+	var ret ffi.Arg
+	isTextureValid.Call(&ret, &texture)
+	return ret.Bool()
+}
+
+// UnloadTexture - Unload texture from GPU memory (VRAM)
+func UnloadTexture(texture Texture2D) {
+	unloadTexture.Call(nil, &texture)
+}
+
+// IsRenderTextureValid - Check if a render texture is valid (loaded in GPU)
+func IsRenderTextureValid(target RenderTexture2D) bool {
+	var ret ffi.Arg
+	isRenderTextureValid.Call(&ret, &target)
+	return ret.Bool()
+}
+
+// UnloadRenderTexture - Unload render texture from GPU memory (VRAM)
+func UnloadRenderTexture(target RenderTexture2D) {
+	unloadRenderTexture.Call(nil, &target)
+}
+
+// UpdateTexture - Update GPU texture with new data ([]color.RGBA, *image.RGBA or []byte)
+func UpdateTexture(texture Texture2D, pixels any) {
+	var cpixels unsafe.Pointer
+	switch p := pixels.(type) {
+	case []color.RGBA:
+		cpixels = unsafe.Pointer(&p[0])
+	case *image.RGBA:
+		cpixels = unsafe.Pointer(&p.Pix[0])
+	case []byte:
+		cpixels = unsafe.Pointer(&p[0])
+	}
+	updateTexture.Call(nil, &texture, &cpixels)
+}
+
+// UpdateTextureRec - Update GPU texture rectangle with new data
+func UpdateTextureRec(texture Texture2D, rec Rectangle, pixels any) {
+	var cpixels unsafe.Pointer
+	switch p := pixels.(type) {
+	case []color.RGBA:
+		cpixels = unsafe.Pointer(&p[0])
+	case *image.RGBA:
+		cpixels = unsafe.Pointer(&p.Pix[0])
+	case []byte:
+		cpixels = unsafe.Pointer(&p[0])
+	}
+	updateTextureRec.Call(nil, &texture, &rec, &cpixels)
 }
