@@ -46,7 +46,9 @@ func LoadFont(fileName string) Font {
 	return v
 }
 
-// LoadFontEx - Load Font from file with extended parameters
+// LoadFontEx - Load Font from file with extended parameters.
+// Use nil for fontChars and 0 for runesNumber to load the default character set.
+// Font size is provided in pixels height.
 func LoadFontEx(fileName string, fontSize int32, fontChars []rune, runesNumber ...int32) Font {
 	var cfontChars *C.int
 	var ccharsCount C.int
