@@ -3,12 +3,33 @@
 
 package rl
 
-// SetVertexAttribute - Set vertex attribute data configuration
-func SetVertexAttribute(index uint32, compSize int32, attrType int32, normalized bool, stride int32, offset int32) {
+import "github.com/jupiterrider/ffi"
 
+var (
+	// Matrix operations
+
+	rlMatrixMode   = dll.MustPrep("rlMatrixMode", &ffi.TypeVoid, &ffi.TypeSint32)
+	rlPushMatrix   = dll.MustPrep("rlPushMatrix", &ffi.TypeVoid)
+	rlPopMatrix    = dll.MustPrep("rlPopMatrix", &ffi.TypeVoid)
+	rlLoadIdentity = dll.MustPrep("rlLoadIdentity", &ffi.TypeVoid)
+)
+
+// MatrixMode - Choose the current matrix to be transformed
+func MatrixMode(mode int32) {
+	rlMatrixMode.Call(nil, &mode)
 }
 
-// EnableVertexAttribute - Enable vertex attribute index
-func EnableVertexAttribute(index uint32) {
+// PushMatrix - Push the current matrix to stack
+func PushMatrix() {
+	rlPushMatrix.Call(nil)
+}
 
+// PopMatrix - Pop lattest inserted matrix from stack
+func PopMatrix() {
+	rlPopMatrix.Call(nil)
+}
+
+// LoadIdentity - Reset current matrix to identity matrix
+func LoadIdentity() {
+	rlLoadIdentity.Call(nil)
 }
