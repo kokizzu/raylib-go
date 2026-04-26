@@ -86,3 +86,7 @@ var typeMesh = ffi.NewType(
 	&ffi.TypePointer, &ffi.TypePointer, &ffi.TypePointer, &ffi.TypePointer, &ffi.TypePointer, &ffi.TypePointer, &ffi.TypePointer,
 	&ffi.TypeSint32, &ffi.TypePointer, &ffi.TypePointer, &ffi.TypePointer, &ffi.TypePointer, &ffi.TypeUint32, &ffi.TypePointer,
 )
+var typeMaterial = ffi.NewType(
+	&typeShader, &ffi.TypePointer,
+	&ffi.TypeFloat, &ffi.TypeFloat, &ffi.TypeFloat, &ffi.TypeFloat,
+)

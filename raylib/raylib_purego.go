@@ -534,6 +534,31 @@ var (
 	drawBillboard    = dll.MustPrep("DrawBillboard", &ffi.TypeVoid, &typeCamera3D, &typeTexture2D, &typeVector3, &ffi.TypeFloat, &typeColor)
 	drawBillboardRec = dll.MustPrep("DrawBillboardRec", &ffi.TypeVoid, &typeCamera3D, &typeTexture2D, &typeRectangle, &typeVector3, &typeVector2, &typeColor)
 	drawBillboardPro = dll.MustPrep("DrawBillboardPro", &ffi.TypeVoid, &typeCamera3D, &typeTexture2D, &typeRectangle, &typeVector3, &typeVector3, &typeVector2, &typeVector2, &ffi.TypeFloat, &typeColor)
+
+	// Mesh management functions
+
+	uploadMesh         = dll.MustPrep("UploadMesh", &ffi.TypeVoid, &ffi.TypePointer, &ffi.TypeUint8)
+	updateMeshBuffer   = dll.MustPrep("UpdateMeshBuffer", &ffi.TypeVoid, &typeMesh, &ffi.TypeSint32, &ffi.TypePointer, &ffi.TypeSint32, &ffi.TypeSint32)
+	unloadMesh         = dll.MustPrep("UnloadMesh", &ffi.TypeVoid, &typeMesh)
+	drawMesh           = dll.MustPrep("DrawMesh", &ffi.TypeVoid, &typeMesh, &typeMaterial, &typeMatrix)
+	drawMeshInstanced  = dll.MustPrep("DrawMeshInstanced", &ffi.TypeVoid, &typeMesh, &typeMaterial, &ffi.TypePointer, &ffi.TypeSint32)
+	getMeshBoundingBox = dll.MustPrep("GetMeshBoundingBox", &typeBoundingBox, &typeMesh)
+	genMeshTangents    = dll.MustPrep("GenMeshTangents", &ffi.TypeVoid, &ffi.TypePointer)
+	exportMesh         = dll.MustPrep("ExportMesh", &ffi.TypeUint8, &typeMesh, &ffi.TypePointer)
+
+	// Mesh generation functions
+
+	genMeshPoly       = dll.MustPrep("GenMeshPoly", &typeMesh, &ffi.TypeSint32, &ffi.TypeFloat)
+	genMeshPlane      = dll.MustPrep("GenMeshPlane", &typeMesh, &ffi.TypeFloat, &ffi.TypeFloat, &ffi.TypeSint32, &ffi.TypeSint32)
+	genMeshCube       = dll.MustPrep("GenMeshCube", &typeMesh, &ffi.TypeFloat, &ffi.TypeFloat, &ffi.TypeFloat)
+	genMeshSphere     = dll.MustPrep("GenMeshSphere", &typeMesh, &ffi.TypeFloat, &ffi.TypeSint32, &ffi.TypeSint32)
+	genMeshHemiSphere = dll.MustPrep("GenMeshHemiSphere", &typeMesh, &ffi.TypeFloat, &ffi.TypeSint32, &ffi.TypeSint32)
+	genMeshCylinder   = dll.MustPrep("GenMeshCylinder", &typeMesh, &ffi.TypeFloat, &ffi.TypeFloat, &ffi.TypeSint32)
+	genMeshCone       = dll.MustPrep("GenMeshCone", &typeMesh, &ffi.TypeFloat, &ffi.TypeFloat, &ffi.TypeSint32)
+	genMeshTorus      = dll.MustPrep("GenMeshTorus", &typeMesh, &ffi.TypeFloat, &ffi.TypeFloat, &ffi.TypeSint32, &ffi.TypeSint32)
+	genMeshKnot       = dll.MustPrep("GenMeshKnot", &typeMesh, &ffi.TypeFloat, &ffi.TypeFloat, &ffi.TypeSint32, &ffi.TypeSint32)
+	genMeshHeightmap  = dll.MustPrep("GenMeshHeightmap", &typeMesh, &typeImage, &typeVector3)
+	genMeshCubicmap   = dll.MustPrep("GenMeshCubicmap", &typeMesh, &typeImage, &typeVector3)
 )
 
 // InitWindow - Initialize window and OpenGL context
@@ -3097,4 +3122,139 @@ func DrawBillboardRec(camera Camera, texture Texture2D, source Rectangle, positi
 // DrawBillboardPro - Draw a billboard texture defined by source and rotation
 func DrawBillboardPro(camera Camera, texture Texture2D, source Rectangle, position Vector3, up Vector3, size Vector2, origin Vector2, rotation float32, tint color.RGBA) {
 	drawBillboardPro.Call(nil, &camera, &texture, &source, &position, &up, &size, &origin, &rotation, &tint)
+}
+
+// UploadMesh - Upload mesh vertex data in GPU and provide VAO/VBO ids
+func UploadMesh(mesh *Mesh, dynamic bool) {
+	uploadMesh.Call(nil, &mesh, &dynamic)
+}
+
+// UpdateMeshBuffer - Update mesh vertex data in GPU for a specific buffer index
+func UpdateMeshBuffer(mesh Mesh, index int32, data []byte, offset int) {
+	dataSize := int32(len(data))
+	dataPtr := unsafe.SliceData(data)
+	o := int32(offset)
+	updateMeshBuffer.Call(nil, &mesh, &index, &dataPtr, &dataSize, &o)
+}
+
+// UnloadMesh - Unload mesh data from CPU and GPU
+func UnloadMesh(mesh *Mesh) {
+	unloadMesh.Call(nil, &mesh)
+}
+
+// DrawMesh - Draw a 3d mesh with material and transform
+func DrawMesh(mesh Mesh, material Material, transform Matrix) {
+	drawMesh.Call(nil, &mesh, &material, &transform)
+}
+
+// DrawMeshInstanced - Draw multiple mesh instances with material and different transforms
+func DrawMeshInstanced(mesh Mesh, material Material, transforms []Matrix, instances int) {
+	i := int32(instances)
+	transformsPtr := unsafe.SliceData(transforms)
+	drawMeshInstanced.Call(nil, &mesh, &material, &transformsPtr, &i)
+}
+
+// GetMeshBoundingBox - Compute mesh bounding box limits
+func GetMeshBoundingBox(mesh Mesh) BoundingBox {
+	var ret BoundingBox
+	getMeshBoundingBox.Call(&ret, &mesh)
+	return ret
+}
+
+// GenMeshTangents - Compute mesh tangents
+func GenMeshTangents(mesh *Mesh) {
+	genMeshTangents.Call(nil, &mesh)
+}
+
+// ExportMesh - Export mesh data to file, returns true on success
+func ExportMesh(mesh Mesh, fileName string) bool {
+	fileNamePtr := convert.ToBytePtr(fileName)
+	var ret ffi.Arg
+	exportMesh.Call(&ret, &mesh, &fileNamePtr)
+	return ret.Bool()
+}
+
+// GenMeshPoly - Generate polygonal mesh
+func GenMeshPoly(sides int, radius float32) Mesh {
+	var ret Mesh
+	s := int32(sides)
+	genMeshPoly.Call(&ret, &s, &radius)
+	return ret
+}
+
+// GenMeshPlane - Generate plane mesh (with subdivisions)
+func GenMeshPlane(width float32, length float32, resX int, resZ int) Mesh {
+	var ret Mesh
+	x, z := int32(resX), int32(resZ)
+	genMeshPlane.Call(&ret, &width, &length, &x, &z)
+	return ret
+}
+
+// GenMeshCube - Generate cuboid mesh
+func GenMeshCube(width float32, height float32, length float32) Mesh {
+	var ret Mesh
+	genMeshCube.Call(&ret, &width, &height, &length)
+	return ret
+}
+
+// GenMeshSphere - Generate sphere mesh (standard sphere)
+func GenMeshSphere(radius float32, rings int, slices int) Mesh {
+	var ret Mesh
+	r, s := int32(rings), int32(slices)
+	genMeshSphere.Call(&ret, &radius, &r, &s)
+	return ret
+}
+
+// GenMeshHemiSphere - Generate half-sphere mesh (no bottom cap)
+func GenMeshHemiSphere(radius float32, rings int, slices int) Mesh {
+	var ret Mesh
+	r, s := int32(rings), int32(slices)
+	genMeshHemiSphere.Call(&ret, &radius, &r, &s)
+	return ret
+}
+
+// GenMeshCylinder - Generate cylinder mesh
+func GenMeshCylinder(radius float32, height float32, slices int) Mesh {
+	var ret Mesh
+	s := int32(slices)
+	genMeshCylinder.Call(&ret, &radius, &height, &s)
+	return ret
+}
+
+// GenMeshCone - Generate cone/pyramid mesh
+func GenMeshCone(radius float32, height float32, slices int) Mesh {
+	var ret Mesh
+	s := int32(slices)
+	genMeshCone.Call(&ret, &radius, &height, &s)
+	return ret
+}
+
+// GenMeshTorus - Generate torus mesh
+func GenMeshTorus(radius float32, size float32, radSeg int, sides int) Mesh {
+	var ret Mesh
+	r, s := int32(radSeg), int32(sides)
+	genMeshTorus.Call(&ret, &radius, &size, &r, &s)
+	return ret
+}
+
+// GenMeshKnot - Generate trefoil knot mesh
+func GenMeshKnot(radius float32, size float32, radSeg int, sides int) Mesh {
+	var ret Mesh
+	r, s := int32(radSeg), int32(sides)
+	genMeshKnot.Call(&ret, &radius, &size, &r, &s)
+	return ret
+}
+
+// GenMeshHeightmap - Generate heightmap mesh from image data
+func GenMeshHeightmap(heightmap Image, size Vector3) Mesh {
+	var ret Mesh
+	genMeshHeightmap.Call(&ret, &heightmap, &size)
+	return ret
+}
+
+// GenMeshCubicmap - Generate cubes-based map mesh from image data
+func GenMeshCubicmap(cubicmap Image, cubeSize Vector3) Mesh {
+	var ret Mesh
+	genMeshCubicmap.Call(&ret, &cubicmap, &cubeSize)
+	return ret
 }
