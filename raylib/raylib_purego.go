@@ -559,6 +559,42 @@ var (
 	genMeshKnot       = dll.MustPrep("GenMeshKnot", &typeMesh, &ffi.TypeFloat, &ffi.TypeFloat, &ffi.TypeSint32, &ffi.TypeSint32)
 	genMeshHeightmap  = dll.MustPrep("GenMeshHeightmap", &typeMesh, &typeImage, &typeVector3)
 	genMeshCubicmap   = dll.MustPrep("GenMeshCubicmap", &typeMesh, &typeImage, &typeVector3)
+
+	// Material loading/unloading functions
+
+	loadMaterials        = dll.MustPrep("LoadMaterials", &ffi.TypePointer, &ffi.TypePointer, &ffi.TypePointer)
+	loadMaterialDefault  = dll.MustPrep("LoadMaterialDefault", &typeMaterial)
+	isMaterialValid      = dll.MustPrep("IsMaterialValid", &ffi.TypeUint8, &typeMaterial)
+	unloadMaterial       = dll.MustPrep("UnloadMaterial", &ffi.TypeVoid, &typeMaterial)
+	setMaterialTexture   = dll.MustPrep("SetMaterialTexture", &ffi.TypeVoid, &ffi.TypePointer, &ffi.TypeSint32, &typeTexture2D)
+	setModelMeshMaterial = dll.MustPrep("SetModelMeshMaterial", &ffi.TypeVoid, &ffi.TypePointer, &ffi.TypeSint32, &ffi.TypeSint32)
+
+	// Model animations loading/unloading functions
+
+	loadModelAnimations    = dll.MustPrep("LoadModelAnimations", &typeModelAnimation, &ffi.TypePointer, &ffi.TypePointer)
+	updateModelAnimation   = dll.MustPrep("UpdateModelAnimation", &ffi.TypeVoid, &typeModel, &typeModelAnimation, &ffi.TypeFloat)
+	updateModelAnimationEx = dll.MustPrep("UpdateModelAnimationEx", &ffi.TypeVoid, &typeModel, &typeModelAnimation, &ffi.TypeFloat, &typeModelAnimation, &ffi.TypeFloat, &ffi.TypeFloat)
+	unloadModelAnimations  = dll.MustPrep("UnloadModelAnimations", &ffi.TypeVoid, &ffi.TypePointer, &ffi.TypeSint32)
+	isModelAnimationValid  = dll.MustPrep("IsModelAnimationValid", &ffi.TypeUint8, &typeModel, &typeModelAnimation)
+
+	// Collision detection functions
+
+	checkCollisionSpheres   = dll.MustPrep("CheckCollisionSpheres", &ffi.TypeUint8, &typeVector3, &ffi.TypeFloat, &typeVector3, &ffi.TypeFloat)
+	checkCollisionBoxes     = dll.MustPrep("CheckCollisionBoxes", &ffi.TypeUint8, &typeBoundingBox, &typeBoundingBox)
+	checkCollisionBoxSphere = dll.MustPrep("CheckCollisionBoxSphere", &ffi.TypeUint8, &typeBoundingBox, &typeVector3, &ffi.TypeFloat)
+	getRayCollisionSphere   = dll.MustPrep("GetRayCollisionSphere", &typeRayCollision, &typeRay, &typeVector3, &ffi.TypeFloat)
+	getRayCollisionBox      = dll.MustPrep("GetRayCollisionBox", &typeRayCollision, &typeRay, &typeBoundingBox)
+	getRayCollisionMesh     = dll.MustPrep("GetRayCollisionMesh", &typeRayCollision, &typeRay, &typeMesh, &typeMatrix)
+	getRayCollisionTriangle = dll.MustPrep("GetRayCollisionTriangle", &typeRayCollision, &typeRay, &typeVector3, &typeVector3, &typeVector3)
+	getRayCollisionQuad     = dll.MustPrep("GetRayCollisionQuad", &typeRayCollision, &typeRay, &typeVector3, &typeVector3, &typeVector3, &typeVector3)
+
+	// Audio device management functions
+
+	initAudioDevice    = dll.MustPrep("InitAudioDevice", &ffi.TypeVoid)
+	closeAudioDevice   = dll.MustPrep("CloseAudioDevice", &ffi.TypeVoid)
+	isAudioDeviceReady = dll.MustPrep("IsAudioDeviceReady", &ffi.TypeUint8)
+	setMasterVolume    = dll.MustPrep("SetMasterVolume", &ffi.TypeVoid, &ffi.TypeFloat)
+	getMasterVolume    = dll.MustPrep("GetMasterVolume", &ffi.TypeFloat)
 )
 
 // InitWindow - Initialize window and OpenGL context
@@ -3257,5 +3293,163 @@ func GenMeshHeightmap(heightmap Image, size Vector3) Mesh {
 func GenMeshCubicmap(cubicmap Image, cubeSize Vector3) Mesh {
 	var ret Mesh
 	genMeshCubicmap.Call(&ret, &cubicmap, &cubeSize)
+	return ret
+}
+
+// LoadMaterials - Load materials from model file
+func LoadMaterials(fileName string) []Material {
+	var materialCount int32
+	materialCountPtr := &materialCount
+	var ret *Material
+	fileNamePtr := convert.ToBytePtr(fileName)
+	loadMaterials.Call(&ret, &fileNamePtr, &materialCountPtr)
+	return unsafe.Slice(ret, materialCount)
+}
+
+// LoadMaterialDefault - Load default material (Supports: DIFFUSE, SPECULAR, NORMAL maps)
+func LoadMaterialDefault() Material {
+	var ret Material
+	loadMaterialDefault.Call(&ret)
+	return ret
+}
+
+// IsMaterialValid - Check if a material is valid (shader assigned, map textures loaded in GPU)
+func IsMaterialValid(material Material) bool {
+	var ret ffi.Arg
+	isMaterialValid.Call(&ret, &material)
+	return ret.Bool()
+}
+
+// UnloadMaterial - Unload material from GPU memory (VRAM)
+func UnloadMaterial(material Material) {
+	unloadMaterial.Call(nil, &material)
+}
+
+// SetMaterialTexture - Set texture for a material map type (MATERIAL_MAP_DIFFUSE, MATERIAL_MAP_SPECULAR...)
+func SetMaterialTexture(material *Material, mapType int32, texture Texture2D) {
+	setMaterialTexture.Call(nil, &material, &mapType, &texture)
+}
+
+// SetModelMeshMaterial - Set material for a mesh
+func SetModelMeshMaterial(model *Model, meshId int32, materialId int32) {
+	setModelMeshMaterial.Call(nil, &model, &meshId, &materialId)
+}
+
+// LoadModelAnimations - Load model animations from file
+func LoadModelAnimations(fileName string) []ModelAnimation {
+	fileNamePtr := convert.ToBytePtr(fileName)
+	var animCount int32
+	animCountPtr := &animCount
+	var ret *ModelAnimation
+	loadModelAnimations.Call(&ret, &fileNamePtr, &animCountPtr)
+	return unsafe.Slice(ret, animCount)
+}
+
+// UpdateModelAnimation - Update model animation pose (vertex buffers and bone matrices)
+func UpdateModelAnimation(model Model, anim ModelAnimation, frame float32) {
+	updateModelAnimation.Call(nil, &model, &anim, &frame)
+}
+
+// UpdateModelAnimationEx - Update model animation pose, blending two animations
+func UpdateModelAnimationEx(model Model, animA ModelAnimation, frameA float32, animB ModelAnimation, frameB, blend float32) {
+	updateModelAnimationEx.Call(nil, &model, &animA, &frameA, &animB, &frameB, &blend)
+}
+
+// UnloadModelAnimations - Unload animation array data
+func UnloadModelAnimations(animations []ModelAnimation) {
+	animCount := int32(len(animations))
+	animationsPtr := unsafe.SliceData(animations)
+	unloadModelAnimations.Call(nil, &animationsPtr, &animCount)
+}
+
+// IsModelAnimationValid - Check model animation skeleton match
+func IsModelAnimationValid(model Model, anim ModelAnimation) bool {
+	var ret ffi.Arg
+	isModelAnimationValid.Call(&ret, &model, &anim)
+	return ret.Bool()
+}
+
+// CheckCollisionSpheres - Check collision between two spheres
+func CheckCollisionSpheres(center1 Vector3, radius1 float32, center2 Vector3, radius2 float32) bool {
+	var ret ffi.Arg
+	checkCollisionSpheres.Call(&ret, &center1, &radius1, &center2, &radius2)
+	return ret.Bool()
+}
+
+// CheckCollisionBoxes - Check collision between two bounding boxes
+func CheckCollisionBoxes(box1 BoundingBox, box2 BoundingBox) bool {
+	var ret ffi.Arg
+	checkCollisionBoxes.Call(&ret, &box1, &box2)
+	return ret.Bool()
+}
+
+// CheckCollisionBoxSphere - Check collision between box and sphere
+func CheckCollisionBoxSphere(box BoundingBox, center Vector3, radius float32) bool {
+	var ret ffi.Arg
+	checkCollisionBoxSphere.Call(&ret, &box, &center, &radius)
+	return ret.Bool()
+}
+
+// GetRayCollisionSphere - Get collision info between ray and sphere
+func GetRayCollisionSphere(ray Ray, center Vector3, radius float32) RayCollision {
+	var ret RayCollision
+	getRayCollisionSphere.Call(&ret, &ray, &center, &radius)
+	return ret
+}
+
+// GetRayCollisionBox - Get collision info between ray and box
+func GetRayCollisionBox(ray Ray, box BoundingBox) RayCollision {
+	var ret RayCollision
+	getRayCollisionBox.Call(&ret, &ray, &box)
+	return ret
+}
+
+// GetRayCollisionMesh - Get collision info between ray and mesh
+func GetRayCollisionMesh(ray Ray, mesh Mesh, transform Matrix) RayCollision {
+	var ret RayCollision
+	getRayCollisionMesh.Call(&ret, &ray, &mesh, &transform)
+	return ret
+}
+
+// GetRayCollisionTriangle - Get collision info between ray and triangle
+func GetRayCollisionTriangle(ray Ray, p1 Vector3, p2 Vector3, p3 Vector3) RayCollision {
+	var ret RayCollision
+	getRayCollisionTriangle.Call(&ret, &ray, &p1, &p2, &p3)
+	return ret
+}
+
+// GetRayCollisionQuad - Get collision info between ray and quad
+func GetRayCollisionQuad(ray Ray, p1 Vector3, p2 Vector3, p3 Vector3, p4 Vector3) RayCollision {
+	var ret RayCollision
+	getRayCollisionQuad.Call(&ret, &ray, &p1, &p2, &p3, &p4)
+	return ret
+}
+
+// InitAudioDevice - Initialize audio device and context
+func InitAudioDevice() {
+	initAudioDevice.Call(nil)
+}
+
+// CloseAudioDevice - Close the audio device and context
+func CloseAudioDevice() {
+	closeAudioDevice.Call(nil)
+}
+
+// IsAudioDeviceReady - Check if audio device has been initialized successfully
+func IsAudioDeviceReady() bool {
+	var ret ffi.Arg
+	isAudioDeviceReady.Call(&ret)
+	return ret.Bool()
+}
+
+// SetMasterVolume - Set master volume (listener)
+func SetMasterVolume(volume float32) {
+	setMasterVolume.Call(nil, &volume)
+}
+
+// GetMasterVolume - Get master volume (listener)
+func GetMasterVolume() float32 {
+	var ret float32
+	getMasterVolume.Call(&ret)
 	return ret
 }

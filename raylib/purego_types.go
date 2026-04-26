@@ -90,3 +90,13 @@ var typeMaterial = ffi.NewType(
 	&typeShader, &ffi.TypePointer,
 	&ffi.TypeFloat, &ffi.TypeFloat, &ffi.TypeFloat, &ffi.TypeFloat,
 )
+var typeModelAnimation = ffi.NewType(
+	&ffi.TypeSint8, &ffi.TypeSint8, &ffi.TypeSint8, &ffi.TypeSint8, &ffi.TypeSint8, &ffi.TypeSint8, &ffi.TypeSint8, &ffi.TypeSint8,
+	&ffi.TypeSint8, &ffi.TypeSint8, &ffi.TypeSint8, &ffi.TypeSint8, &ffi.TypeSint8, &ffi.TypeSint8, &ffi.TypeSint8, &ffi.TypeSint8,
+	&ffi.TypeSint8, &ffi.TypeSint8, &ffi.TypeSint8, &ffi.TypeSint8, &ffi.TypeSint8, &ffi.TypeSint8, &ffi.TypeSint8, &ffi.TypeSint8,
+	&ffi.TypeSint8, &ffi.TypeSint8, &ffi.TypeSint8, &ffi.TypeSint8, &ffi.TypeSint8, &ffi.TypeSint8, &ffi.TypeSint8, &ffi.TypeSint8,
+	&ffi.TypeSint32,
+	&ffi.TypeSint32,
+	&ffi.TypePointer,
+)
+var typeRayCollision = ffi.NewType(&ffi.TypeUint8, &ffi.TypeFloat, &typeVector3, &typeVector3)
