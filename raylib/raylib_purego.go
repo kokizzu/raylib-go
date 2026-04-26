@@ -2826,8 +2826,9 @@ func LoadFontData(fileData []byte, fontSize int32, codepoints []rune, codepointC
 	}
 	codepointsPtr := unsafe.SliceData(codepoints)
 	var glyphCount int32
+	glyphCountPtr := &glyphCount
 	var ret *GlyphInfo
-	loadFontData.Call(&ret, &fileDataPtr, &dataSize, &fontSize, &codepointsPtr, &codepointCount, &typ, &glyphCount)
+	loadFontData.Call(&ret, &fileDataPtr, &dataSize, &fontSize, &codepointsPtr, &codepointCount, &typ, &glyphCountPtr)
 	if ret == nil || glyphCount <= 0 {
 		return nil
 	}
