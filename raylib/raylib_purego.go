@@ -7,8 +7,11 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"os"
+	"reflect"
 	"unsafe"
 
+	"github.com/ebitengine/purego"
 	"github.com/gen2brain/raylib-go/raylib/internal/convert"
 	"github.com/jupiterrider/ffi"
 )
@@ -16,6 +19,10 @@ import (
 var (
 	// dll is the pointer to the shared library
 	dll ffi.Lib = loadLibrary()
+
+	// audioCallbacks is needed to have a reference between Go functions (keys) created by the user
+	// and C function pointers (values) created by purego.NewCallback
+	audioCallbacks map[uintptr]uintptr = make(map[uintptr]uintptr)
 
 	// Window-related functions
 
@@ -645,6 +652,28 @@ var (
 	setMusicPan               = dll.MustPrep("SetMusicPan", &ffi.TypeVoid, &typeMusic, &ffi.TypeFloat)
 	getMusicTimeLength        = dll.MustPrep("GetMusicTimeLength", &ffi.TypeFloat, &typeMusic)
 	getMusicTimePlayed        = dll.MustPrep("GetMusicTimePlayed", &ffi.TypeFloat, &typeMusic)
+
+	// AudioStream management functions
+
+	loadAudioStream                 = dll.MustPrep("LoadAudioStream", &typeAudioStream, &ffi.TypeUint32, &ffi.TypeUint32, &ffi.TypeUint32)
+	isAudioStreamValid              = dll.MustPrep("IsAudioStreamValid", &ffi.TypeUint8, &typeAudioStream)
+	unloadAudioStream               = dll.MustPrep("UnloadAudioStream", &ffi.TypeVoid, &typeAudioStream)
+	updateAudioStream               = dll.MustPrep("UpdateAudioStream", &ffi.TypeVoid, &typeAudioStream, &ffi.TypePointer, &ffi.TypeSint32)
+	isAudioStreamProcessed          = dll.MustPrep("IsAudioStreamProcessed", &ffi.TypeUint8, &typeAudioStream)
+	playAudioStream                 = dll.MustPrep("PlayAudioStream", &ffi.TypeVoid, &typeAudioStream)
+	pauseAudioStream                = dll.MustPrep("PauseAudioStream", &ffi.TypeVoid, &typeAudioStream)
+	resumeAudioStream               = dll.MustPrep("ResumeAudioStream", &ffi.TypeVoid, &typeAudioStream)
+	isAudioStreamPlaying            = dll.MustPrep("IsAudioStreamPlaying", &ffi.TypeUint8, &typeAudioStream)
+	stopAudioStream                 = dll.MustPrep("StopAudioStream", &ffi.TypeVoid, &typeAudioStream)
+	setAudioStreamVolume            = dll.MustPrep("SetAudioStreamVolume", &ffi.TypeVoid, &typeAudioStream, &ffi.TypeFloat)
+	setAudioStreamPitch             = dll.MustPrep("SetAudioStreamPitch", &ffi.TypeVoid, &typeAudioStream, &ffi.TypeFloat)
+	setAudioStreamPan               = dll.MustPrep("SetAudioStreamPan", &ffi.TypeVoid, &typeAudioStream, &ffi.TypeFloat)
+	setAudioStreamBufferSizeDefault = dll.MustPrep("SetAudioStreamBufferSizeDefault", &ffi.TypeVoid, &ffi.TypeSint32)
+	setAudioStreamCallback          = dll.MustPrep("SetAudioStreamCallback", &ffi.TypeVoid, &typeAudioStream, &ffi.TypePointer)
+	attachAudioStreamProcessor      = dll.MustPrep("AttachAudioStreamProcessor", &ffi.TypeVoid, &typeAudioStream, &ffi.TypePointer)
+	detachAudioStreamProcessor      = dll.MustPrep("DetachAudioStreamProcessor", &ffi.TypeVoid, &typeAudioStream, &ffi.TypePointer)
+	attachAudioMixedProcessor       = dll.MustPrep("AttachAudioMixedProcessor", &ffi.TypeVoid, &ffi.TypePointer)
+	detachAudioMixedProcessor       = dll.MustPrep("DetachAudioMixedProcessor", &ffi.TypeVoid, &ffi.TypePointer)
 )
 
 // InitWindow - Initialize window and OpenGL context
@@ -3751,4 +3780,181 @@ func GetMusicTimePlayed(music Music) float32 {
 	var ret float32
 	getMusicTimePlayed.Call(&ret, &music)
 	return ret
+}
+
+// LoadAudioStream - Load audio stream (to stream raw audio pcm data)
+func LoadAudioStream(sampleRate uint32, sampleSize uint32, channels uint32) AudioStream {
+	var ret AudioStream
+	loadAudioStream.Call(&ret, &sampleRate, &sampleSize, &channels)
+	return ret
+}
+
+// IsAudioStreamValid - Checks if an audio stream is valid (buffers initialized)
+func IsAudioStreamValid(stream AudioStream) bool {
+	var ret ffi.Arg
+	isAudioStreamValid.Call(&ret, &stream)
+	return ret.Bool()
+}
+
+// UnloadAudioStream - Unload audio stream and free memory
+func UnloadAudioStream(stream AudioStream) {
+	unloadAudioStream.Call(nil, &stream)
+}
+
+// UpdateAudioStream - Update audio stream buffers with data ([]float32 or []int16)
+func UpdateAudioStream(stream AudioStream, data any) {
+	var dataPtr unsafe.Pointer
+	var frameCount int32
+	switch d := data.(type) {
+	case []float32:
+		dataPtr = unsafe.Pointer(&d[0])
+		frameCount = int32(len(d))
+	case []int16:
+		dataPtr = unsafe.Pointer(&d[0])
+		frameCount = int32(len(d))
+	}
+	updateAudioStream.Call(nil, &stream, &dataPtr, &frameCount)
+}
+
+// IsAudioStreamProcessed - Check if any audio stream buffers requires refill
+func IsAudioStreamProcessed(stream AudioStream) bool {
+	var ret ffi.Arg
+	isAudioStreamProcessed.Call(&ret, &stream)
+	return ret.Bool()
+}
+
+// PlayAudioStream - Play audio stream
+func PlayAudioStream(stream AudioStream) {
+	playAudioStream.Call(nil, &stream)
+}
+
+// PauseAudioStream - Pause audio stream
+func PauseAudioStream(stream AudioStream) {
+	pauseAudioStream.Call(nil, &stream)
+}
+
+// ResumeAudioStream - Resume audio stream
+func ResumeAudioStream(stream AudioStream) {
+	resumeAudioStream.Call(nil, &stream)
+}
+
+// IsAudioStreamPlaying - Check if audio stream is playing
+func IsAudioStreamPlaying(stream AudioStream) bool {
+	var ret ffi.Arg
+	isAudioStreamPlaying.Call(&ret, &stream)
+	return ret.Bool()
+}
+
+// StopAudioStream - Stop audio stream
+func StopAudioStream(stream AudioStream) {
+	stopAudioStream.Call(nil, &stream)
+}
+
+// SetAudioStreamVolume - Set volume for audio stream (1.0 is max level)
+func SetAudioStreamVolume(stream AudioStream, volume float32) {
+	setAudioStreamVolume.Call(nil, &stream, &volume)
+}
+
+// SetAudioStreamPitch - Set pitch for audio stream (1.0 is base level)
+func SetAudioStreamPitch(stream AudioStream, pitch float32) {
+	setAudioStreamPitch.Call(nil, &stream, &pitch)
+}
+
+// SetAudioStreamPan - Set pan for audio stream (-1.0 to 1.0 range, 0.0 is centered)
+func SetAudioStreamPan(stream AudioStream, pan float32) {
+	setAudioStreamPan.Call(nil, &stream, &pan)
+}
+
+// SetAudioStreamBufferSizeDefault - Default size for new audio streams
+func SetAudioStreamBufferSizeDefault(size int32) {
+	setAudioStreamBufferSizeDefault.Call(nil, &size)
+}
+
+// SetAudioStreamCallback - Audio thread callback to request new data
+func SetAudioStreamCallback(stream AudioStream, callback AudioCallback) {
+	fn := purego.NewCallback(func(bufferData unsafe.Pointer, frames int32) uintptr {
+		callback(unsafe.Slice((*float32)(bufferData), frames), int(frames))
+		return 0
+	})
+	setAudioStreamCallback.Call(nil, &stream, &fn)
+}
+
+// AttachAudioStreamProcessor - Attach audio stream processor to stream, receives frames x 2 samples as 'float' (stereo)
+func AttachAudioStreamProcessor(stream AudioStream, processor AudioCallback) {
+	fn := purego.NewCallback(func(bufferData unsafe.Pointer, frames int32) uintptr {
+		processor(unsafe.Slice((*float32)(bufferData), frames), int(frames))
+		return 0
+	})
+	ptr := uintptr(reflect.ValueOf(processor).UnsafePointer())
+	audioCallbacks[ptr] = fn
+	attachAudioStreamProcessor.Call(nil, &stream, &fn)
+}
+
+// DetachAudioStreamProcessor - Detach audio stream processor from stream
+func DetachAudioStreamProcessor(stream AudioStream, processor AudioCallback) {
+	ptr := uintptr(reflect.ValueOf(processor).UnsafePointer())
+	fn := audioCallbacks[ptr]
+	detachAudioStreamProcessor.Call(nil, &stream, &fn)
+}
+
+// AttachAudioMixedProcessor - Attach audio stream processor to the entire audio pipeline, receives frames x 2 samples as 'float' (stereo)
+func AttachAudioMixedProcessor(processor AudioCallback) {
+	fn := purego.NewCallback(func(bufferData unsafe.Pointer, frames int32) uintptr {
+		processor(unsafe.Slice((*float32)(bufferData), frames), int(frames))
+		return 0
+	})
+	ptr := uintptr(reflect.ValueOf(processor).UnsafePointer())
+	audioCallbacks[ptr] = fn
+	attachAudioMixedProcessor.Call(nil, &fn)
+}
+
+// DetachAudioMixedProcessor - Detach audio stream processor from the entire audio pipeline
+func DetachAudioMixedProcessor(processor AudioCallback) {
+	ptr := uintptr(reflect.ValueOf(processor).UnsafePointer())
+	fn := audioCallbacks[ptr]
+	detachAudioMixedProcessor.Call(nil, &fn)
+}
+
+// SetMain - Sets callback function
+func SetMain(func()) {
+}
+
+// NewImageFromImage - Returns new Image from Go image.Image
+func NewImageFromImage(img image.Image) *Image {
+	size := img.Bounds().Size()
+
+	ret := GenImageColor(size.X, size.Y, White)
+
+	for y := 0; y < size.Y; y++ {
+		for x := 0; x < size.X; x++ {
+			col := img.At(x, y)
+			r, g, b, a := col.RGBA()
+			rcolor := NewColor(uint8(r>>8), uint8(g>>8), uint8(b>>8), uint8(a>>8))
+			ImageDrawPixel(ret, int32(x), int32(y), rcolor)
+		}
+	}
+
+	return ret
+}
+
+// ToImage converts a Image to Go image.Image
+func (i *Image) ToImage() image.Image {
+	img := image.NewRGBA(image.Rect(0, 0, int(i.Width), int(i.Height)))
+
+	// Get pixel data from image (RGBA 32bit)
+	ret := LoadImageColors(i)
+	pixels := (*[1 << 24]uint8)(unsafe.Pointer(unsafe.SliceData(ret)))[0 : i.Width*i.Height*4]
+
+	img.Pix = pixels
+
+	return img
+}
+
+// HomeDir - Returns user home directory
+// NOTE: On Android this returns internal data path and must be called after InitWindow
+func HomeDir() string {
+	if homeDir, err := os.UserHomeDir(); err == nil {
+		return homeDir
+	}
+	return ""
 }
