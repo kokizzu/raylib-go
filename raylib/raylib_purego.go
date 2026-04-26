@@ -515,6 +515,25 @@ var (
 	drawPlane           = dll.MustPrep("DrawPlane", &ffi.TypeVoid, &typeVector3, &typeVector2, &typeColor)
 	drawRay             = dll.MustPrep("DrawRay", &ffi.TypeVoid, &typeRay, &typeColor)
 	drawGrid            = dll.MustPrep("DrawGrid", &ffi.TypeVoid, &ffi.TypeSint32, &ffi.TypeFloat)
+
+	// Model management functions
+
+	loadModel           = dll.MustPrep("LoadModel", &typeModel, &ffi.TypePointer)
+	loadModelFromMesh   = dll.MustPrep("LoadModelFromMesh", &typeModel, &typeMesh)
+	isModelValid        = dll.MustPrep("IsModelValid", &ffi.TypeUint8, &typeModel)
+	unloadModel         = dll.MustPrep("UnloadModel", &ffi.TypeVoid, &typeModel)
+	getModelBoundingBox = dll.MustPrep("GetModelBoundingBox", &typeBoundingBox, &typeModel)
+
+	// Model drawing functions
+
+	drawModel        = dll.MustPrep("DrawModel", &ffi.TypeVoid, &typeModel, &typeVector3, &ffi.TypeFloat, &typeColor)
+	drawModelEx      = dll.MustPrep("DrawModelEx", &ffi.TypeVoid, &typeModel, &typeVector3, &typeVector3, &ffi.TypeFloat, &typeVector3, &typeColor)
+	drawModelWires   = dll.MustPrep("DrawModelWires", &ffi.TypeVoid, &typeModel, &typeVector3, &ffi.TypeFloat, &typeColor)
+	drawModelWiresEx = dll.MustPrep("DrawModelWiresEx", &ffi.TypeVoid, &typeModel, &typeVector3, &typeVector3, &ffi.TypeFloat, &typeVector3, &typeColor)
+	drawBoundingBox  = dll.MustPrep("DrawBoundingBox", &ffi.TypeVoid, &typeBoundingBox, &typeColor)
+	drawBillboard    = dll.MustPrep("DrawBillboard", &ffi.TypeVoid, &typeCamera3D, &typeTexture2D, &typeVector3, &ffi.TypeFloat, &typeColor)
+	drawBillboardRec = dll.MustPrep("DrawBillboardRec", &ffi.TypeVoid, &typeCamera3D, &typeTexture2D, &typeRectangle, &typeVector3, &typeVector2, &typeColor)
+	drawBillboardPro = dll.MustPrep("DrawBillboardPro", &ffi.TypeVoid, &typeCamera3D, &typeTexture2D, &typeRectangle, &typeVector3, &typeVector3, &typeVector2, &typeVector2, &ffi.TypeFloat, &typeColor)
 )
 
 // InitWindow - Initialize window and OpenGL context
@@ -3004,4 +3023,78 @@ func DrawRay(ray Ray, col color.RGBA) {
 // DrawGrid - Draw a grid (centered at (0, 0, 0))
 func DrawGrid(slices int32, spacing float32) {
 	drawGrid.Call(nil, &slices, &spacing)
+}
+
+// LoadModel - Load model from files (meshes and materials)
+func LoadModel(fileName string) Model {
+	var ret Model
+	fileNamePtr := convert.ToBytePtr(fileName)
+	loadModel.Call(&ret, &fileNamePtr)
+	return ret
+}
+
+// LoadModelFromMesh - Load model from generated mesh (default material)
+func LoadModelFromMesh(mesh Mesh) Model {
+	var ret Model
+	loadModelFromMesh.Call(&ret, &mesh)
+	return ret
+}
+
+// IsModelValid - Check if a model is valid (loaded in GPU, VAO/VBOs)
+func IsModelValid(model Model) bool {
+	var ret ffi.Arg
+	isModelValid.Call(&ret, &model)
+	return ret.Bool()
+}
+
+// UnloadModel - Unload model (including meshes) from memory (RAM and/or VRAM)
+func UnloadModel(model Model) {
+	unloadModel.Call(nil, &model)
+}
+
+// GetModelBoundingBox - Compute model bounding box limits (considers all meshes)
+func GetModelBoundingBox(model Model) BoundingBox {
+	var ret BoundingBox
+	getModelBoundingBox.Call(&ret, &model)
+	return ret
+}
+
+// DrawModel - Draw a model (with texture if set)
+func DrawModel(model Model, position Vector3, scale float32, tint color.RGBA) {
+	drawModel.Call(nil, &model, &position, &scale, &tint)
+}
+
+// DrawModelEx - Draw a model with extended parameters
+func DrawModelEx(model Model, position Vector3, rotationAxis Vector3, rotationAngle float32, scale Vector3, tint color.RGBA) {
+	drawModelEx.Call(nil, &model, &position, &rotationAxis, &rotationAngle, &scale, &tint)
+}
+
+// DrawModelWires - Draw a model wires (with texture if set)
+func DrawModelWires(model Model, position Vector3, scale float32, tint color.RGBA) {
+	drawModelWires.Call(nil, &model, &position, &scale, &tint)
+}
+
+// DrawModelWiresEx - Draw a model wires (with texture if set) with extended parameters
+func DrawModelWiresEx(model Model, position Vector3, rotationAxis Vector3, rotationAngle float32, scale Vector3, tint color.RGBA) {
+	drawModelWiresEx.Call(nil, &model, &position, &rotationAxis, &rotationAngle, &scale, &tint)
+}
+
+// DrawBoundingBox - Draw bounding box (wires)
+func DrawBoundingBox(box BoundingBox, col color.RGBA) {
+	drawBoundingBox.Call(nil, &box, &col)
+}
+
+// DrawBillboard - Draw a billboard texture
+func DrawBillboard(camera Camera, texture Texture2D, position Vector3, scale float32, tint color.RGBA) {
+	drawBillboard.Call(nil, &camera, &texture, &position, &scale, &tint)
+}
+
+// DrawBillboardRec - Draw a billboard texture defined by source
+func DrawBillboardRec(camera Camera, texture Texture2D, source Rectangle, position Vector3, size Vector2, tint color.RGBA) {
+	drawBillboardRec.Call(nil, &camera, &texture, &source, &position, &size, &tint)
+}
+
+// DrawBillboardPro - Draw a billboard texture defined by source and rotation
+func DrawBillboardPro(camera Camera, texture Texture2D, source Rectangle, position Vector3, up Vector3, size Vector2, origin Vector2, rotation float32, tint color.RGBA) {
+	drawBillboardPro.Call(nil, &camera, &texture, &source, &position, &up, &size, &origin, &rotation, &tint)
 }

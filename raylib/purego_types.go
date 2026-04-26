@@ -68,3 +68,21 @@ var typeGlyphInfo = ffi.NewType(
 	&ffi.TypeSint32,
 	&typeImage,
 )
+var typeModelSkeleton = ffi.NewType(&ffi.TypeSint32, &ffi.TypePointer, &ffi.TypePointer)
+var typeModel = ffi.NewType(
+	&typeMatrix,
+	&ffi.TypeSint32,
+	&ffi.TypeSint32,
+	&ffi.TypePointer,
+	&ffi.TypePointer,
+	&ffi.TypePointer,
+	&typeModelSkeleton,
+	&ffi.TypePointer,
+	&ffi.TypePointer,
+)
+var typeBoundingBox = ffi.NewType(&typeVector3, &typeVector3)
+var typeMesh = ffi.NewType(
+	&ffi.TypeSint32, &ffi.TypeSint32,
+	&ffi.TypePointer, &ffi.TypePointer, &ffi.TypePointer, &ffi.TypePointer, &ffi.TypePointer, &ffi.TypePointer, &ffi.TypePointer,
+	&ffi.TypeSint32, &ffi.TypePointer, &ffi.TypePointer, &ffi.TypePointer, &ffi.TypePointer, &ffi.TypeUint32, &ffi.TypePointer,
+)
