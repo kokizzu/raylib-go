@@ -140,6 +140,10 @@ var (
 	pollInputEvents  = dll.MustPrep("PollInputEvents", &ffi.TypeVoid)
 	waitTime         = dll.MustPrep("WaitTime", &ffi.TypeVoid, &ffi.TypeDouble)
 
+	// Random values generation functions
+
+	getRandomValue = dll.MustPrep("GetRandomValue", &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32)
+
 	// Misc. functions
 
 	takeScreenshot = dll.MustPrep("TakeScreenshot", &ffi.TypeVoid, &ffi.TypePointer)
@@ -1114,6 +1118,15 @@ func PollInputEvents() {
 // WaitTime - Wait for some time (halt program execution)
 func WaitTime(seconds float64) {
 	waitTime.Call(nil, &seconds)
+}
+
+// GetRandomValue - Returns a random value between min and max (both included)
+//
+// Note: You can use go's math/rand package instead
+func GetRandomValue(min, max int32) int32 {
+	var ret ffi.Arg
+	getRandomValue.Call(&ret, &min, &max)
+	return int32(ret)
 }
 
 // TakeScreenshot - Takes a screenshot of current screen (filename extension defines format)

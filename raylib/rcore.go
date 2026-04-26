@@ -897,6 +897,8 @@ func GetPixelDataSize(width, height, format int32) int32 {
 }
 
 // GetRandomValue - Returns a random value between min and max (both included)
+//
+// Note: You can use go's math/rand package instead
 func GetRandomValue(min, max int32) int32 {
 	cmin := (C.int)(min)
 	cmax := (C.int)(max)
