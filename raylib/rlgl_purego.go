@@ -76,6 +76,41 @@ var (
 	rlActiveDrawBuffers    = dll.MustPrep("rlActiveDrawBuffers", &ffi.TypeVoid, &ffi.TypeSint32)
 	rlBlitFramebuffer      = dll.MustPrep("rlBlitFramebuffer", &ffi.TypeVoid, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32)
 	rlBindFramebuffer      = dll.MustPrep("rlBindFramebuffer", &ffi.TypeVoid, &ffi.TypeUint32, &ffi.TypeUint32)
+
+	// General render state
+
+	rlEnableColorBlend        = dll.MustPrep("rlEnableColorBlend", &ffi.TypeVoid)
+	rlDisableColorBlend       = dll.MustPrep("rlDisableColorBlend", &ffi.TypeVoid)
+	rlEnableDepthTest         = dll.MustPrep("rlEnableDepthTest", &ffi.TypeVoid)
+	rlDisableDepthTest        = dll.MustPrep("rlDisableDepthTest", &ffi.TypeVoid)
+	rlEnableDepthMask         = dll.MustPrep("rlEnableDepthMask", &ffi.TypeVoid)
+	rlDisableDepthMask        = dll.MustPrep("rlDisableDepthMask", &ffi.TypeVoid)
+	rlEnableBackfaceCulling   = dll.MustPrep("rlEnableBackfaceCulling", &ffi.TypeVoid)
+	rlDisableBackfaceCulling  = dll.MustPrep("rlDisableBackfaceCulling", &ffi.TypeVoid)
+	rlColorMask               = dll.MustPrep("rlColorMask", &ffi.TypeVoid, &ffi.TypeUint8, &ffi.TypeUint8, &ffi.TypeUint8, &ffi.TypeUint8)
+	rlSetCullFace             = dll.MustPrep("rlSetCullFace", &ffi.TypeVoid, &ffi.TypeSint32)
+	rlEnableScissorTest       = dll.MustPrep("rlEnableScissorTest", &ffi.TypeVoid)
+	rlDisableScissorTest      = dll.MustPrep("rlDisableScissorTest", &ffi.TypeVoid)
+	rlScissor                 = dll.MustPrep("rlScissor", &ffi.TypeVoid, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32)
+	rlEnablePointMode         = dll.MustPrep("rlEnablePointMode", &ffi.TypeVoid)
+	rlDisablePointMode        = dll.MustPrep("rlDisablePointMode", &ffi.TypeVoid)
+	rlSetPointSize            = dll.MustPrep("rlSetPointSize", &ffi.TypeVoid, &ffi.TypeFloat)
+	rlGetPointSize            = dll.MustPrep("rlGetPointSize", &ffi.TypeFloat)
+	rlEnableWireMode          = dll.MustPrep("rlEnableWireMode", &ffi.TypeVoid)
+	rlDisableWireMode         = dll.MustPrep("rlDisableWireMode", &ffi.TypeVoid)
+	rlSetLineWidth            = dll.MustPrep("rlSetLineWidth", &ffi.TypeVoid, &ffi.TypeFloat)
+	rlGetLineWidth            = dll.MustPrep("rlGetLineWidth", &ffi.TypeFloat)
+	rlEnableSmoothLines       = dll.MustPrep("rlEnableSmoothLines", &ffi.TypeVoid)
+	rlDisableSmoothLines      = dll.MustPrep("rlDisableSmoothLines", &ffi.TypeVoid)
+	rlEnableStereoRender      = dll.MustPrep("rlEnableStereoRender", &ffi.TypeVoid)
+	rlDisableStereoRender     = dll.MustPrep("rlDisableStereoRender", &ffi.TypeVoid)
+	rlIsStereoRenderEnabled   = dll.MustPrep("rlIsStereoRenderEnabled", &ffi.TypeUint8)
+	rlClearColor              = dll.MustPrep("rlClearColor", &ffi.TypeVoid, &ffi.TypeUint8, &ffi.TypeUint8, &ffi.TypeUint8, &ffi.TypeUint8)
+	rlClearScreenBuffers      = dll.MustPrep("rlClearScreenBuffers", &ffi.TypeVoid)
+	rlCheckErrors             = dll.MustPrep("rlCheckErrors", &ffi.TypeVoid)
+	rlSetBlendMode            = dll.MustPrep("rlSetBlendMode", &ffi.TypeVoid, &ffi.TypeSint32)
+	rlSetBlendFactors         = dll.MustPrep("rlSetBlendFactors", &ffi.TypeVoid, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32)
+	rlSetBlendFactorsSeparate = dll.MustPrep("rlSetBlendFactorsSeparate", &ffi.TypeVoid, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32)
 )
 
 // SetVertexAttribute - Set vertex attribute data configuration
@@ -334,4 +369,170 @@ func BlitFramebuffer(srcX, srcY, srcWidth, srcHeight, dstX, dstY, dstWidth, dstH
 // BindFramebuffer - Bind framebuffer (FBO)
 func BindFramebuffer(target, framebuffer uint32) {
 	rlBindFramebuffer.Call(nil, &target, &framebuffer)
+}
+
+// EnableColorBlend - Enable color blending
+func EnableColorBlend() {
+	rlEnableColorBlend.Call(nil)
+}
+
+// DisableColorBlend - Disable color blending
+func DisableColorBlend() {
+	rlDisableColorBlend.Call(nil)
+}
+
+// EnableDepthTest - Enable depth test
+func EnableDepthTest() {
+	rlEnableDepthTest.Call(nil)
+}
+
+// DisableDepthTest - Disable depth test
+func DisableDepthTest() {
+	rlDisableDepthTest.Call(nil)
+}
+
+// EnableDepthMask - Enable depth write
+func EnableDepthMask() {
+	rlEnableDepthMask.Call(nil)
+}
+
+// DisableDepthMask - Disable depth write
+func DisableDepthMask() {
+	rlDisableDepthMask.Call(nil)
+}
+
+// EnableBackfaceCulling - Enable backface culling
+func EnableBackfaceCulling() {
+	rlEnableBackfaceCulling.Call(nil)
+}
+
+// DisableBackfaceCulling - Disable backface culling
+func DisableBackfaceCulling() {
+	rlDisableBackfaceCulling.Call(nil)
+}
+
+// ColorMask - Color mask control
+func ColorMask(r, g, b, a bool) {
+	rlColorMask.Call(nil, &r, &g, &b, &a)
+}
+
+// SetCullFace - Set face culling mode
+func SetCullFace(mode int32) {
+	rlSetCullFace.Call(nil, &mode)
+}
+
+// EnableScissorTest - Enable scissor test
+func EnableScissorTest() {
+	rlEnableScissorTest.Call(nil)
+}
+
+// DisableScissorTest - Disable scissor test
+func DisableScissorTest() {
+	rlDisableScissorTest.Call(nil)
+}
+
+// Scissor - Scissor test
+func Scissor(x int32, y int32, width int32, height int32) {
+	rlScissor.Call(nil, &x, &y, &width, &height)
+}
+
+// EnablePointMode - Enable point mode
+func EnablePointMode() {
+	rlEnablePointMode.Call(nil)
+}
+
+// DisablePointMode - Disable point mode
+func DisablePointMode() {
+	rlDisablePointMode.Call(nil)
+}
+
+// SetPointSize - Set the point drawing size
+func SetPointSize(size float32) {
+	rlSetPointSize.Call(nil, &size)
+}
+
+// GetPointSize - Get the point drawing size
+func GetPointSize() float32 {
+	var ret float32
+	rlGetPointSize.Call(&ret)
+	return ret
+}
+
+// EnableWireMode - Enable wire mode
+func EnableWireMode() {
+	rlEnableWireMode.Call(nil)
+}
+
+// DisableWireMode - Disable wire mode
+func DisableWireMode() {
+	rlDisableWireMode.Call(nil)
+}
+
+// SetLineWidth - Set the line drawing width
+func SetLineWidth(width float32) {
+	rlSetLineWidth.Call(nil, &width)
+}
+
+// GetLineWidth - Get the line drawing width
+func GetLineWidth() float32 {
+	var ret float32
+	rlGetLineWidth.Call(&ret)
+	return ret
+}
+
+// EnableSmoothLines - Enable line aliasing
+func EnableSmoothLines() {
+	rlEnableSmoothLines.Call(nil)
+}
+
+// DisableSmoothLines - Disable line aliasing
+func DisableSmoothLines() {
+	rlDisableSmoothLines.Call(nil)
+}
+
+// EnableStereoRender - Enable stereo rendering
+func EnableStereoRender() {
+	rlEnableStereoRender.Call(nil)
+}
+
+// DisableStereoRender - Disable stereo rendering
+func DisableStereoRender() {
+	rlDisableStereoRender.Call(nil)
+}
+
+// IsStereoRenderEnabled - Check if stereo render is enabled
+func IsStereoRenderEnabled() bool {
+	var ret ffi.Arg
+	rlIsStereoRenderEnabled.Call(&ret)
+	return ret.Bool()
+}
+
+// ClearColor - Clear color buffer with color
+func ClearColor(r, g, b, a uint8) {
+	rlClearColor.Call(nil, &r, &g, &b, &a)
+}
+
+// ClearScreenBuffers - Clear used screen buffers (color and depth)
+func ClearScreenBuffers() {
+	rlClearScreenBuffers.Call(nil)
+}
+
+// CheckErrors - Check and log OpenGL error codes
+func CheckErrors() {
+	rlCheckErrors.Call(nil)
+}
+
+// SetBlendMode - Set blending mode
+func SetBlendMode(mode BlendMode) {
+	rlSetBlendMode.Call(nil, &mode)
+}
+
+// SetBlendFactors - Set blending mode factor and equation (using OpenGL factors)
+func SetBlendFactors(glSrcFactor, glDstFactor, glEquation int32) {
+	rlSetBlendFactors.Call(nil, &glSrcFactor, &glDstFactor, &glEquation)
+}
+
+// SetBlendFactorsSeparate - Set blending mode factors and equations separately (using OpenGL factors)
+func SetBlendFactorsSeparate(glSrcRGB, glDstRGB, glSrcAlpha, glDstAlpha, glEqRGB, glEqAlpha int32) {
+	rlSetBlendFactorsSeparate.Call(nil, &glSrcRGB, &glDstRGB, &glSrcAlpha, &glDstAlpha, &glEqRGB, &glEqAlpha)
 }
