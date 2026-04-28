@@ -6,6 +6,7 @@ package rl
 import (
 	"unsafe"
 
+	"github.com/gen2brain/raylib-go/raylib/internal/convert"
 	"github.com/jupiterrider/ffi"
 )
 
@@ -111,6 +112,20 @@ var (
 	rlSetBlendMode            = dll.MustPrep("rlSetBlendMode", &ffi.TypeVoid, &ffi.TypeSint32)
 	rlSetBlendFactors         = dll.MustPrep("rlSetBlendFactors", &ffi.TypeVoid, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32)
 	rlSetBlendFactorsSeparate = dll.MustPrep("rlSetBlendFactorsSeparate", &ffi.TypeVoid, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32)
+
+	// rlgl initialization functions
+
+	rlglInit               = dll.MustPrep("rlglInit", &ffi.TypeVoid, &ffi.TypeSint32, &ffi.TypeSint32)
+	rlglClose              = dll.MustPrep("rlglClose", &ffi.TypeVoid)
+	rlGetProcAddress       = dll.MustPrep("rlGetProcAddress", &ffi.TypePointer, &ffi.TypePointer)
+	rlGetVersion           = dll.MustPrep("rlGetVersion", &ffi.TypeSint32)
+	rlSetFramebufferWidth  = dll.MustPrep("rlSetFramebufferWidth", &ffi.TypeVoid, &ffi.TypeSint32)
+	rlGetFramebufferWidth  = dll.MustPrep("rlGetFramebufferWidth", &ffi.TypeSint32)
+	rlSetFramebufferHeight = dll.MustPrep("rlSetFramebufferHeight", &ffi.TypeVoid, &ffi.TypeSint32)
+	rlGetFramebufferHeight = dll.MustPrep("rlGetFramebufferHeight", &ffi.TypeSint32)
+	rlGetTextureIdDefault  = dll.MustPrep("rlGetTextureIdDefault", &ffi.TypeUint32)
+	rlGetShaderIdDefault   = dll.MustPrep("rlGetShaderIdDefault", &ffi.TypeUint32)
+	rlGetShaderLocsDefault = dll.MustPrep("rlGetShaderLocsDefault", &ffi.TypePointer)
 )
 
 // SetVertexAttribute - Set vertex attribute data configuration
@@ -535,4 +550,75 @@ func SetBlendFactors(glSrcFactor, glDstFactor, glEquation int32) {
 // SetBlendFactorsSeparate - Set blending mode factors and equations separately (using OpenGL factors)
 func SetBlendFactorsSeparate(glSrcRGB, glDstRGB, glSrcAlpha, glDstAlpha, glEqRGB, glEqAlpha int32) {
 	rlSetBlendFactorsSeparate.Call(nil, &glSrcRGB, &glDstRGB, &glSrcAlpha, &glDstAlpha, &glEqRGB, &glEqAlpha)
+}
+
+// GlInit - Initialize rlgl (buffers, shaders, textures, states)
+func GlInit(width int32, height int32) {
+	rlglInit.Call(nil, &width, &height)
+}
+
+// GlClose - De-inititialize rlgl (buffers, shaders, textures)
+func GlClose() {
+	rlglClose.Call(nil)
+}
+
+// GetProcAddress - Get OpenGL procedure address
+func GetProcAddress(procName string) unsafe.Pointer {
+	procNamePtr := convert.ToBytePtr(procName)
+	var ret unsafe.Pointer
+	rlGetProcAddress.Call(&ret, &procNamePtr)
+	return ret
+}
+
+// GetVersion - Get current OpenGL version
+func GetVersion() int32 {
+	var ret ffi.Arg
+	rlGetVersion.Call(&ret)
+	return int32(ret)
+}
+
+// SetFramebufferWidth - Set current framebuffer width
+func SetFramebufferWidth(width int32) {
+	rlSetFramebufferWidth.Call(nil, &width)
+}
+
+// GetFramebufferWidth - Get default framebuffer width
+func GetFramebufferWidth() int32 {
+	var ret ffi.Arg
+	rlGetFramebufferWidth.Call(&ret)
+	return int32(ret)
+}
+
+// SetFramebufferHeight - Set current framebuffer height
+func SetFramebufferHeight(height int32) {
+	rlSetFramebufferHeight.Call(nil, &height)
+}
+
+// GetFramebufferHeight - Get default framebuffer height
+func GetFramebufferHeight() int32 {
+	var ret ffi.Arg
+	rlGetFramebufferHeight.Call(&ret)
+	return int32(ret)
+}
+
+// GetTextureIdDefault - Get default texture id
+func GetTextureIdDefault() uint32 {
+	var ret ffi.Arg
+	rlGetTextureIdDefault.Call(&ret)
+	return uint32(ret)
+}
+
+// GetShaderIdDefault - Get default shader id
+func GetShaderIdDefault() uint32 {
+	var ret ffi.Arg
+	rlGetShaderIdDefault.Call(&ret)
+	return uint32(ret)
+}
+
+// GetShaderLocsDefault - Get default shader locations
+func GetShaderLocsDefault() []int32 {
+	var ret *int32
+	rlGetShaderLocsDefault.Call(&ret)
+	// the default value of RL_MAX_SHADER_LOCATIONS is 32
+	return unsafe.Slice(ret, 32)
 }
