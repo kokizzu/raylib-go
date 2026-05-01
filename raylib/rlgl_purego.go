@@ -136,11 +136,24 @@ var (
 	rlDrawRenderBatchActive = dll.MustPrep("rlDrawRenderBatchActive", &ffi.TypeVoid)
 	rlCheckRenderBatchLimit = dll.MustPrep("rlCheckRenderBatchLimit", &ffi.TypeUint8, &ffi.TypeSint32)
 	rlSetTexture            = dll.MustPrep("rlSetTexture", &ffi.TypeVoid, &ffi.TypeUint32)
-)
 
-// SetVertexAttribute - Set vertex attribute data configuration
-func SetVertexAttribute(index uint32, compSize int32, attrType int32, normalized bool, stride int32, offset int32) {
-}
+	// Vertex buffers management
+
+	rlLoadVertexArray                  = dll.MustPrep("rlLoadVertexArray", &ffi.TypeUint32)
+	rlLoadVertexBuffer                 = dll.MustPrep("rlLoadVertexBuffer", &ffi.TypeUint32, &ffi.TypePointer, &ffi.TypeSint32, &ffi.TypeUint8)
+	rlLoadVertexBufferElement          = dll.MustPrep("rlLoadVertexBufferElement", &ffi.TypeUint32, &ffi.TypePointer, &ffi.TypeSint32, &ffi.TypeUint8)
+	rlUpdateVertexBuffer               = dll.MustPrep("rlUpdateVertexBuffer", &ffi.TypeVoid, &ffi.TypeUint32, &ffi.TypePointer, &ffi.TypeSint32, &ffi.TypeSint32)
+	rlUpdateVertexBufferElements       = dll.MustPrep("rlUpdateVertexBufferElements", &ffi.TypeVoid, &ffi.TypeUint32, &ffi.TypePointer, &ffi.TypeSint32, &ffi.TypeSint32)
+	rlUnloadVertexArray                = dll.MustPrep("rlUnloadVertexArray", &ffi.TypeVoid, &ffi.TypeUint32)
+	rlUnloadVertexBuffer               = dll.MustPrep("rlUnloadVertexBuffer", &ffi.TypeVoid, &ffi.TypeUint32)
+	rlSetVertexAttribute               = dll.MustPrep("rlSetVertexAttribute", &ffi.TypeVoid, &ffi.TypeUint32, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeUint8, &ffi.TypeSint32, &ffi.TypeSint32)
+	rlSetVertexAttributeDivisor        = dll.MustPrep("rlSetVertexAttributeDivisor", &ffi.TypeVoid, &ffi.TypeUint32, &ffi.TypeSint32)
+	rlSetVertexAttributeDefault        = dll.MustPrep("rlSetVertexAttributeDefault", &ffi.TypeVoid, &ffi.TypeSint32, &ffi.TypePointer, &ffi.TypeSint32, &ffi.TypeSint32)
+	rlDrawVertexArray                  = dll.MustPrep("rlDrawVertexArray", &ffi.TypeVoid, &ffi.TypeSint32, &ffi.TypeSint32)
+	rlDrawVertexArrayElements          = dll.MustPrep("rlDrawVertexArrayElements", &ffi.TypeVoid, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypePointer)
+	rlDrawVertexArrayInstanced         = dll.MustPrep("rlDrawVertexArrayInstanced", &ffi.TypeVoid, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32)
+	rlDrawVertexArrayElementsInstanced = dll.MustPrep("rlDrawVertexArrayElementsInstanced", &ffi.TypeVoid, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypePointer, &ffi.TypeSint32)
+)
 
 // MatrixMode - Choose the current matrix to be transformed
 func MatrixMode(mode int32) {
@@ -670,4 +683,100 @@ func CheckRenderBatchLimit(vCount int32) bool {
 // SetTexture - Set current texture for render batch and check buffers limits
 func SetTexture(id uint32) {
 	rlSetTexture.Call(nil, &id)
+}
+
+// LoadVertexArray - Load vertex array (vao) if supported
+func LoadVertexArray() uint32 {
+	var ret ffi.Arg
+	rlLoadVertexArray.Call(&ret)
+	return uint32(ret)
+}
+
+// LoadVertexBuffer - Load a vertex buffer object
+func LoadVertexBuffer[T any](buffer []T, dynamic bool) uint32 {
+	if len(buffer) == 0 {
+		return 0
+	}
+	size := int32(int(unsafe.Sizeof(buffer[0])) * len(buffer))
+	bufferPtr := unsafe.SliceData(buffer)
+	var ret ffi.Arg
+	rlLoadVertexBuffer.Call(&ret, &bufferPtr, &size, &dynamic)
+	return uint32(ret)
+}
+
+// LoadVertexBufferElement - Load vertex buffer elements object
+func LoadVertexBufferElement[T any](buffer []T, dynamic bool) uint32 {
+	if len(buffer) == 0 {
+		return 0
+	}
+	size := int32(int(unsafe.Sizeof(buffer[0])) * len(buffer))
+	bufferPtr := unsafe.SliceData(buffer)
+	var ret ffi.Arg
+	rlLoadVertexBufferElement.Call(&ret, &bufferPtr, &size, &dynamic)
+	return uint32(ret)
+}
+
+// UpdateVertexBuffer - Update vertex buffer object data on GPU buffer
+func UpdateVertexBuffer[T any](bufferId uint32, data []T, offset int32) {
+	if len(data) == 0 {
+		return
+	}
+	dataSize := int32(int(unsafe.Sizeof(data[0])) * len(data))
+	dataPtr := unsafe.SliceData(data)
+	rlUpdateVertexBuffer.Call(nil, &bufferId, &dataPtr, &dataSize, &offset)
+}
+
+// UpdateVertexBufferElements - Update vertex buffer elements data on GPU buffer
+func UpdateVertexBufferElements[T any](id uint32, data []T, offset int32) {
+	if len(data) == 0 {
+		return
+	}
+	dataSize := int32(int(unsafe.Sizeof(data[0])) * len(data))
+	dataPtr := unsafe.SliceData(data)
+	rlUpdateVertexBufferElements.Call(nil, &id, &dataPtr, &dataSize, &offset)
+}
+
+// UnloadVertexArray - Unload vertex array (vao)
+func UnloadVertexArray(vaoId uint32) {
+	rlUnloadVertexArray.Call(nil, &vaoId)
+}
+
+// UnloadVertexBuffer - Unload vertex buffer object
+func UnloadVertexBuffer(vboId uint32) {
+	rlUnloadVertexBuffer.Call(nil, &vboId)
+}
+
+// SetVertexAttribute - Set vertex attribute data configuration
+func SetVertexAttribute(index uint32, compSize int32, attrType int32, normalized bool, stride int32, offset int32) {
+	rlSetVertexAttribute.Call(nil, &index, &compSize, &attrType, &normalized, &stride, &offset)
+}
+
+// SetVertexAttributeDivisor - Set vertex attribute data divisor
+func SetVertexAttributeDivisor(index uint32, divisor int32) {
+	rlSetVertexAttributeDivisor.Call(nil, &index, &divisor)
+}
+
+// SetVertexAttributeDefault - Set vertex attribute default value, when attribute to provided
+func SetVertexAttributeDefault(locIndex int32, value unsafe.Pointer, attribType int32, count int32) {
+	rlSetVertexAttributeDefault.Call(nil, &locIndex, &value, &attribType, &count)
+}
+
+// DrawVertexArray - Draw vertex array (currently active vao)
+func DrawVertexArray(offset int32, count int32) {
+	rlDrawVertexArray.Call(nil, &offset, &count)
+}
+
+// DrawVertexArrayElements - Draw vertex array elements
+func DrawVertexArrayElements(offset int32, count int32, buffer unsafe.Pointer) {
+	rlDrawVertexArrayElements.Call(nil, &offset, &count, &buffer)
+}
+
+// DrawVertexArrayInstanced - Draw vertex array (currently active vao) with instancing
+func DrawVertexArrayInstanced(offset, count, instances int32) {
+	rlDrawVertexArrayInstanced.Call(nil, &offset, &count, &instances)
+}
+
+// DrawVertexArrayElementsInstanced - Draw vertex array elements with instancing
+func DrawVertexArrayElementsInstanced(offset int32, count int32, buffer unsafe.Pointer, instances int32) {
+	rlDrawVertexArrayElementsInstanced.Call(nil, &offset, &count, &buffer, &instances)
 }
