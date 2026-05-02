@@ -578,7 +578,7 @@ var (
 
 	// Model animations loading/unloading functions
 
-	loadModelAnimations    = dll.MustPrep("LoadModelAnimations", &typeModelAnimation, &ffi.TypePointer, &ffi.TypePointer)
+	loadModelAnimations    = dll.MustPrep("LoadModelAnimations", &ffi.TypePointer, &ffi.TypePointer, &ffi.TypePointer)
 	updateModelAnimation   = dll.MustPrep("UpdateModelAnimation", &ffi.TypeVoid, &typeModel, &typeModelAnimation, &ffi.TypeFloat)
 	updateModelAnimationEx = dll.MustPrep("UpdateModelAnimationEx", &ffi.TypeVoid, &typeModel, &typeModelAnimation, &ffi.TypeFloat, &typeModelAnimation, &ffi.TypeFloat, &ffi.TypeFloat)
 	unloadModelAnimations  = dll.MustPrep("UnloadModelAnimations", &ffi.TypeVoid, &ffi.TypePointer, &ffi.TypeSint32)
