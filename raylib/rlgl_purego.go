@@ -164,6 +164,8 @@ var (
 	rlFramebufferAttach   = dll.MustPrep("rlFramebufferAttach", &ffi.TypeVoid, &ffi.TypeUint32, &ffi.TypeUint32, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32)
 	rlFramebufferComplete = dll.MustPrep("rlFramebufferComplete", &ffi.TypeUint8, &ffi.TypeUint32)
 	rlUnloadFramebuffer   = dll.MustPrep("rlUnloadFramebuffer", &ffi.TypeVoid, &ffi.TypeUint32)
+	rlCopyFramebuffer     = dll.MustPrep("rlCopyFramebuffer", &ffi.TypeVoid, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypeSint32, &ffi.TypePointer)
+	rlResizeFramebuffer   = dll.MustPrep("rlResizeFramebuffer", &ffi.TypeVoid, &ffi.TypeSint32, &ffi.TypeSint32)
 
 	// Shaders management
 
@@ -173,6 +175,48 @@ var (
 	rlLoadShaderProgramCompute = dll.MustPrep("rlLoadShaderProgramCompute", &ffi.TypeUint32, &ffi.TypeUint32)
 	rlUnloadShader             = dll.MustPrep("rlUnloadShader", &ffi.TypeVoid, &ffi.TypeUint32)
 	rlUnloadShaderProgram      = dll.MustPrep("rlUnloadShaderProgram", &ffi.TypeVoid, &ffi.TypeUint32)
+	rlGetLocationUniform       = dll.MustPrep("rlGetLocationUniform", &ffi.TypeSint32, &ffi.TypeUint32, &ffi.TypePointer)
+	rlGetLocationAttrib        = dll.MustPrep("rlGetLocationAttrib", &ffi.TypeSint32, &ffi.TypeUint32, &ffi.TypePointer)
+	rlSetUniform               = dll.MustPrep("rlSetUniform", &ffi.TypeVoid, &ffi.TypeSint32, &ffi.TypePointer, &ffi.TypeSint32, &ffi.TypeSint32)
+	rlSetUniformMatrix         = dll.MustPrep("rlSetUniformMatrix", &ffi.TypeVoid, &ffi.TypeSint32, &typeMatrix)
+	rlSetUniformMatrices       = dll.MustPrep("rlSetUniformMatrices", &ffi.TypeVoid, &ffi.TypeSint32, &ffi.TypePointer, &ffi.TypeSint32)
+	rlSetUniformSampler        = dll.MustPrep("rlSetUniformSampler", &ffi.TypeVoid, &ffi.TypeSint32, &ffi.TypeUint32)
+	rlSetShader                = dll.MustPrep("rlSetShader", &ffi.TypeVoid, &ffi.TypeUint32, &ffi.TypePointer)
+
+	// Compute shader management
+
+	rlComputeShaderDispatch = dll.MustPrep("rlComputeShaderDispatch", &ffi.TypeVoid, &ffi.TypeUint32, &ffi.TypeUint32, &ffi.TypeUint32)
+
+	// Shader buffer storage object management (ssbo)
+
+	rlLoadShaderBuffer    = dll.MustPrep("rlLoadShaderBuffer", &ffi.TypeUint32, &ffi.TypeUint32, &ffi.TypePointer, &ffi.TypeSint32)
+	rlUnloadShaderBuffer  = dll.MustPrep("rlUnloadShaderBuffer", &ffi.TypeVoid, &ffi.TypeUint32)
+	rlUpdateShaderBuffer  = dll.MustPrep("rlUpdateShaderBuffer", &ffi.TypeVoid, &ffi.TypeUint32, &ffi.TypePointer, &ffi.TypeUint32, &ffi.TypeUint32)
+	rlBindShaderBuffer    = dll.MustPrep("rlBindShaderBuffer", &ffi.TypeVoid, &ffi.TypeUint32, &ffi.TypeUint32)
+	rlReadShaderBuffer    = dll.MustPrep("rlReadShaderBuffer", &ffi.TypeVoid, &ffi.TypeUint32, &ffi.TypePointer, &ffi.TypeUint32, &ffi.TypeUint32)
+	rlCopyShaderBuffer    = dll.MustPrep("rlCopyShaderBuffer", &ffi.TypeVoid, &ffi.TypeUint32, &ffi.TypeUint32, &ffi.TypeUint32, &ffi.TypeUint32, &ffi.TypeUint32)
+	rlGetShaderBufferSize = dll.MustPrep("rlGetShaderBufferSize", &ffi.TypeUint32, &ffi.TypeUint32)
+
+	// Buffer management
+
+	rlBindImageTexture = dll.MustPrep("rlBindImageTexture", &ffi.TypeVoid, &ffi.TypeUint32, &ffi.TypeUint32, &ffi.TypeSint32, &ffi.TypeUint8)
+
+	// Matrix state management
+
+	rlGetMatrixModelview        = dll.MustPrep("rlGetMatrixModelview", &typeMatrix)
+	rlGetMatrixProjection       = dll.MustPrep("rlGetMatrixProjection", &typeMatrix)
+	rlGetMatrixTransform        = dll.MustPrep("rlGetMatrixTransform", &typeMatrix)
+	rlGetMatrixProjectionStereo = dll.MustPrep("rlGetMatrixProjectionStereo", &ffi.TypeSint32)
+	rlGetMatrixViewOffsetStereo = dll.MustPrep("rlGetMatrixViewOffsetStereo", &ffi.TypeSint32)
+	rlSetMatrixProjection       = dll.MustPrep("rlSetMatrixProjection", &ffi.TypeVoid, &typeMatrix)
+	rlSetMatrixModelview        = dll.MustPrep("rlSetMatrixProjection", &ffi.TypeVoid, &typeMatrix)
+	rlSetMatrixProjectionStereo = dll.MustPrep("rlSetMatrixProjectionStereo", &ffi.TypeVoid, &typeMatrix, &typeMatrix)
+	rlSetMatrixViewOffsetStereo = dll.MustPrep("rlSetMatrixViewOffsetStereo", &ffi.TypeVoid, &typeMatrix, &typeMatrix)
+
+	// Quick and dirty cube/quad buffers load->draw->unload
+
+	rlLoadDrawCube = dll.MustPrep("rlLoadDrawCube", &ffi.TypeVoid)
+	rlLoadDrawQuad = dll.MustPrep("rlLoadDrawQuad", &ffi.TypeVoid)
 )
 
 // MatrixMode - Choose the current matrix to be transformed
@@ -816,8 +860,8 @@ func LoadFramebuffer() uint32 {
 }
 
 // FramebufferAttach - Attach texture/renderbuffer to a framebuffer
-func FramebufferAttach(fboId, texId uint32, attachType, texType, mipLevel int32) {
-	rlFramebufferAttach.Call(nil, &fboId, &texId, &attachType, &texType, &mipLevel)
+func FramebufferAttach(id, texId uint32, attachType, texType, mipLevel int32) {
+	rlFramebufferAttach.Call(nil, &id, &texId, &attachType, &texType, &mipLevel)
 }
 
 // FramebufferComplete - Verify framebuffer is complete
@@ -830,6 +874,20 @@ func FramebufferComplete(id uint32) bool {
 // UnloadFramebuffer - Delete framebuffer from GPU
 func UnloadFramebuffer(id uint32) {
 	rlUnloadFramebuffer.Call(nil, &id)
+}
+
+// CopyFramebuffer - Copy framebuffer pixel data to internal buffer
+//
+// WARNING: Copy and resize framebuffer functionality only defined for software backend
+func CopyFramebuffer(x, y, width, height, format int32, pixels unsafe.Pointer) {
+	rlCopyFramebuffer.Call(nil, &x, &y, &width, &height, &format, &pixels)
+}
+
+// ResizeFramebuffer - Resize internal framebuffer
+//
+// WARNING: Copy and resize framebuffer functionality only defined for software backend
+func ResizeFramebuffer(width, height int32) {
+	rlResizeFramebuffer.Call(nil, &width, &height)
 }
 
 // LoadShaderId - Load (compile) shader and return shader id (type: [VertexShader], [FragmentShader], [ComputeShader])
@@ -871,4 +929,162 @@ func UnloadShaderId(id uint32) {
 // UnloadShaderProgram - Unload shader program
 func UnloadShaderProgram(id uint32) {
 	rlUnloadShaderProgram.Call(nil, &id)
+}
+
+// GetLocationUniform - Get shader location uniform, requires shader program id
+func GetLocationUniform(id uint32, uniformName string) int32 {
+	uniformNamePtr := convert.ToBytePtr(uniformName)
+	var ret ffi.Arg
+	rlGetLocationUniform.Call(&ret, &id, &uniformNamePtr)
+	return int32(ret)
+}
+
+// GetLocationAttrib - Get shader location attribute, requires shader program id
+func GetLocationAttrib(id uint32, attribName string) int32 {
+	attribNamePtr := convert.ToBytePtr(attribName)
+	var ret ffi.Arg
+	rlGetLocationAttrib.Call(&ret, &id, &attribNamePtr)
+	return int32(ret)
+}
+
+// SetUniform - Set shader value uniform ([]float32, []int32, []uint32)
+func SetUniform[T ~float32 | ~int32 | ~uint32](locIndex int32, value []T, uniformType, count int32) {
+	valuePtr := unsafe.SliceData(value)
+	rlSetUniform.Call(nil, &locIndex, &valuePtr, &uniformType, &count)
+}
+
+// SetUniformMatrix - Set shader value matrix
+func SetUniformMatrix(locIndex int32, mat Matrix) {
+	rlSetUniformMatrix.Call(nil, &locIndex, &mat)
+}
+
+// SetUniformMatrices - Set shader value matrices
+func SetUniformMatrices(locIndex int32, mat []Matrix) {
+	matPtr := unsafe.SliceData(mat)
+	count := int32(len(mat))
+	rlSetUniformMatrices.Call(nil, &locIndex, &matPtr, &count)
+}
+
+// SetUniformSampler - Set shader value sampler
+func SetUniformSampler(locIndex int32, textureId uint32) {
+	rlSetUniformSampler.Call(nil, &locIndex, &textureId)
+}
+
+// SetShader - Set shader currently active (id and locations)
+func SetShader(id uint32, locs *int32) {
+	rlSetShader.Call(&id, &locs)
+}
+
+// ComputeShaderDispatch - Dispatch compute shader (equivalent to *draw* for graphics pilepine)
+func ComputeShaderDispatch(groupX uint32, groupY uint32, groupZ uint32) {
+	rlComputeShaderDispatch.Call(nil, &groupX, &groupY, &groupZ)
+}
+
+// LoadShaderBuffer loads a shader storage buffer object (SSBO)
+func LoadShaderBuffer(size uint32, data unsafe.Pointer, usageHint int32) uint32 {
+	var ret ffi.Arg
+	rlLoadShaderBuffer.Call(&ret, &size, &data, &usageHint)
+	return uint32(ret)
+}
+
+// UnloadShaderBuffer - Unload shader storage buffer object (SSBO)
+func UnloadShaderBuffer(id uint32) {
+	rlUnloadShaderBuffer.Call(nil, &id)
+}
+
+// UpdateShaderBuffer - Update SSBO buffer data
+func UpdateShaderBuffer(id uint32, data unsafe.Pointer, dataSize uint32, offset uint32) {
+	rlUpdateShaderBuffer.Call(nil, &id, &data, &dataSize, &offset)
+}
+
+// BindShaderBuffer - Bind SSBO buffer
+func BindShaderBuffer(id uint32, index uint32) {
+	rlBindShaderBuffer.Call(nil, &id, &index)
+}
+
+// ReadShaderBuffer - Read SSBO buffer data (GPU->CPU)
+func ReadShaderBuffer(id uint32, dest unsafe.Pointer, count uint32, offset uint32) {
+	rlReadShaderBuffer.Call(nil, &id, &dest, &count, &offset)
+}
+
+// CopyShaderBuffer - Copy SSBO data between buffers
+func CopyShaderBuffer(destId uint32, srcId uint32, destOffset uint32, srcOffset uint32, count uint32) {
+	rlCopyShaderBuffer.Call(nil, &destId, &srcId, &destOffset, &srcOffset, &count)
+}
+
+// GetShaderBufferSize - Get SSBO buffer size
+func GetShaderBufferSize(id uint32) uint32 {
+	var ret ffi.Arg
+	rlGetShaderBufferSize.Call(&ret, &id)
+	return uint32(ret)
+}
+
+// BindImageTexture - Bind image texture
+func BindImageTexture(id uint32, index uint32, format int32, readonly bool) {
+	rlBindImageTexture.Call(nil, &id, &index, &format, &readonly)
+}
+
+// GetMatrixModelview - Get internal modelview matrix
+func GetMatrixModelview() Matrix {
+	var ret Matrix
+	rlGetMatrixModelview.Call(&ret)
+	return ret
+}
+
+// GetMatrixProjection - Get internal projection matrix
+func GetMatrixProjection() Matrix {
+	var ret Matrix
+	rlGetMatrixProjection.Call(&ret)
+	return ret
+}
+
+// GetMatrixTransform - Get internal accumulated transform matrix
+func GetMatrixTransform() Matrix {
+	var ret Matrix
+	rlGetMatrixTransform.Call(&ret)
+	return ret
+}
+
+// GetMatrixProjectionStereo - Get internal projection matrix for stereo render (selected eye)
+func GetMatrixProjectionStereo(eye int32) Matrix {
+	var ret Matrix
+	rlGetMatrixProjectionStereo.Call(&ret, &eye)
+	return ret
+}
+
+// GetMatrixViewOffsetStereo - Get internal view offset matrix for stereo render (selected eye)
+func GetMatrixViewOffsetStereo(eye int32) Matrix {
+	var ret Matrix
+	rlGetMatrixViewOffsetStereo.Call(&ret, &eye)
+	return ret
+}
+
+// SetMatrixProjection - Set a custom projection matrix (replaces internal projection matrix)
+func SetMatrixProjection(proj Matrix) {
+	rlSetMatrixProjection.Call(nil, &proj)
+}
+
+// SetMatrixModelview - Set a custom modelview matrix (replaces internal modelview matrix)
+func SetMatrixModelview(view Matrix) {
+	rlSetMatrixModelview.Call(nil, &view)
+}
+
+// SetMatrixProjectionStereo - Set eyes projection matrices for stereo rendering
+func SetMatrixProjectionStereo(right Matrix, left Matrix) {
+	rlSetMatrixProjectionStereo.Call(nil, &right, &left)
+}
+
+// SetMatrixViewOffsetStereo - Set eyes view offsets matrices for stereo rendering
+func SetMatrixViewOffsetStereo(right Matrix, left Matrix) {
+	rlSetMatrixViewOffsetStereo.Call(nil, &right, &left)
+}
+
+// LoadDrawCube - Load and draw a cube
+func LoadDrawCube() {
+	rlLoadDrawCube.Call(nil)
+}
+
+// LoadDrawQuad - Load and draw a quad
+func LoadDrawQuad() {
+	rlLoadDrawQuad.Call(nil)
 }
