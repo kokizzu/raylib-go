@@ -100,6 +100,14 @@ func DrawTriangle3D(v1 Vector3, v2 Vector3, v3 Vector3, col color.RGBA) {
 	C.DrawTriangle3D(*cv1, *cv2, *cv3, *ccolor)
 }
 
+// DrawTriangleStrip3D - Draw a triangle strip defined by points
+func DrawTriangleStrip3D(points []Vector3, col color.RGBA) {
+	cpointsCount := (C.int)(len(points))
+	ccolor := colorCptr(col)
+	cpoints := (*C.Vector3)(unsafe.Pointer(&points[0]))
+	C.DrawTriangleStrip3D(cpoints, cpointsCount, *ccolor)
+}
+
 // DrawCube - Draw cube
 func DrawCube(position Vector3, width float32, height float32, length float32, col color.RGBA) {
 	cposition := position.cptr()
@@ -339,38 +347,38 @@ func DrawBoundingBox(box BoundingBox, col color.RGBA) {
 }
 
 // DrawBillboard - Draw a billboard texture
-func DrawBillboard(camera Camera, texture Texture2D, center Vector3, scale float32, tint color.RGBA) {
+func DrawBillboard(camera Camera, texture Texture2D, position Vector3, scale float32, tint color.RGBA) {
 	ccamera := camera.cptr()
 	ctexture := texture.cptr()
-	ccenter := center.cptr()
+	cposition := position.cptr()
 	cscale := (C.float)(scale)
 	ctint := colorCptr(tint)
-	C.DrawBillboard(*ccamera, *ctexture, *ccenter, cscale, *ctint)
+	C.DrawBillboard(*ccamera, *ctexture, *cposition, cscale, *ctint)
 }
 
-// DrawBillboardRec - Draw a billboard texture defined by sourceRec
-func DrawBillboardRec(camera Camera, texture Texture2D, sourceRec Rectangle, center Vector3, size Vector2, tint color.RGBA) {
+// DrawBillboardRec - Draw a billboard texture defined by source
+func DrawBillboardRec(camera Camera, texture Texture2D, source Rectangle, position Vector3, size Vector2, tint color.RGBA) {
 	ccamera := camera.cptr()
 	ctexture := texture.cptr()
-	csourceRec := sourceRec.cptr()
-	ccenter := center.cptr()
+	csource := source.cptr()
+	cposition := position.cptr()
 	csize := size.cptr()
 	ctint := colorCptr(tint)
-	C.DrawBillboardRec(*ccamera, *ctexture, *csourceRec, *ccenter, *csize, *ctint)
+	C.DrawBillboardRec(*ccamera, *ctexture, *csource, *cposition, *csize, *ctint)
 }
 
-// DrawBillboardPro - Draw a billboard texture with pro parameters
-func DrawBillboardPro(camera Camera, texture Texture2D, sourceRec Rectangle, position Vector3, up Vector3, size Vector2, origin Vector2, rotation float32, tint Color) {
+// DrawBillboardPro - Draw a billboard texture defined by source and rotation
+func DrawBillboardPro(camera Camera, texture Texture2D, source Rectangle, position Vector3, up Vector3, size Vector2, origin Vector2, rotation float32, tint color.RGBA) {
 	ccamera := camera.cptr()
 	ctexture := texture.cptr()
-	csourceRec := sourceRec.cptr()
+	csource := source.cptr()
 	cposition := position.cptr()
 	cup := up.cptr()
 	csize := size.cptr()
 	corigin := origin.cptr()
 	crotation := (C.float)(rotation)
 	ctint := colorCptr(tint)
-	C.DrawBillboardPro(*ccamera, *ctexture, *csourceRec, *cposition, *cup, *csize, *corigin, crotation, *ctint)
+	C.DrawBillboardPro(*ccamera, *ctexture, *csource, *cposition, *cup, *csize, *corigin, crotation, *ctint)
 }
 
 // UpdateMeshBuffer - Update mesh vertex data in GPU for a specific buffer index
@@ -391,12 +399,14 @@ func DrawMeshInstanced(mesh Mesh, material Material, transforms []Matrix, instan
 	C.DrawMeshInstanced(*mesh.cptr(), *material.cptr(), transforms[0].cptr(), C.int(instances))
 }
 
-// ExportMesh - Export mesh as an OBJ file
-func ExportMesh(mesh Mesh, fileName string) {
+// ExportMesh - Export mesh data to file, returns true on success
+func ExportMesh(mesh Mesh, fileName string) bool {
 	cfileName := C.CString(fileName)
 	defer C.free(unsafe.Pointer(cfileName))
 	cmesh := mesh.cptr()
-	C.ExportMesh(*cmesh, cfileName)
+	ret := C.ExportMesh(*cmesh, cfileName)
+	v := bool(ret)
+	return v
 }
 
 // GetMeshBoundingBox - Compute mesh bounding box limits
@@ -405,6 +415,12 @@ func GetMeshBoundingBox(mesh Mesh) BoundingBox {
 	ret := C.GetMeshBoundingBox(*cmesh)
 	v := newBoundingBoxFromPointer(unsafe.Pointer(&ret))
 	return v
+}
+
+// GenMeshTangents - Compute mesh tangents
+func GenMeshTangents(mesh *Mesh) {
+	cmesh := mesh.cptr()
+	C.GenMeshTangents(cmesh)
 }
 
 // GenMeshPoly - Generate polygonal mesh
@@ -608,12 +624,12 @@ func IsModelAnimationValid(model Model, anim ModelAnimation) bool {
 }
 
 // CheckCollisionSpheres - Detect collision between two spheres
-func CheckCollisionSpheres(centerA Vector3, radiusA float32, centerB Vector3, radiusB float32) bool {
-	ccenterA := centerA.cptr()
-	cradiusA := (C.float)(radiusA)
-	ccenterB := centerB.cptr()
-	cradiusB := (C.float)(radiusB)
-	ret := C.CheckCollisionSpheres(*ccenterA, cradiusA, *ccenterB, cradiusB)
+func CheckCollisionSpheres(center1 Vector3, radius1 float32, center2 Vector3, radius2 float32) bool {
+	ccenter1 := center1.cptr()
+	cradius1 := (C.float)(radius1)
+	ccenter2 := center2.cptr()
+	cradius2 := (C.float)(radius2)
+	ret := C.CheckCollisionSpheres(*ccenter1, cradius1, *ccenter2, cradius2)
 	v := bool(ret)
 	return v
 }
@@ -628,11 +644,11 @@ func CheckCollisionBoxes(box1 BoundingBox, box2 BoundingBox) bool {
 }
 
 // CheckCollisionBoxSphere - Detect collision between box and sphere
-func CheckCollisionBoxSphere(box BoundingBox, centerSphere Vector3, radiusSphere float32) bool {
+func CheckCollisionBoxSphere(box BoundingBox, center Vector3, radius float32) bool {
 	cbox := box.cptr()
-	ccenterSphere := centerSphere.cptr()
-	cradiusSphere := (C.float)(radiusSphere)
-	ret := C.CheckCollisionBoxSphere(*cbox, *ccenterSphere, cradiusSphere)
+	ccenter := center.cptr()
+	cradius := (C.float)(radius)
+	ret := C.CheckCollisionBoxSphere(*cbox, *ccenter, cradius)
 	v := bool(ret)
 	return v
 }

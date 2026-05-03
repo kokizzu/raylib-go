@@ -287,23 +287,23 @@ func SetWindowMonitor(monitor int) {
 }
 
 // SetWindowMinSize - Set window minimum dimensions (for FLAG_WINDOW_RESIZABLE)
-func SetWindowMinSize(w, h int) {
-	cw := (C.int)(w)
-	ch := (C.int)(h)
+func SetWindowMinSize(width int, height int) {
+	cw := (C.int)(width)
+	ch := (C.int)(height)
 	C.SetWindowMinSize(cw, ch)
 }
 
 // SetWindowMaxSize - Set window maximum dimensions (for FLAG_WINDOW_RESIZABLE)
-func SetWindowMaxSize(w, h int) {
-	cw := (C.int)(w)
-	ch := (C.int)(h)
+func SetWindowMaxSize(width int, height int) {
+	cw := (C.int)(width)
+	ch := (C.int)(height)
 	C.SetWindowMaxSize(cw, ch)
 }
 
 // SetWindowSize - Set window dimensions
-func SetWindowSize(w, h int) {
-	cw := (C.int)(w)
-	ch := (C.int)(h)
+func SetWindowSize(width int, height int) {
+	cw := (C.int)(width)
+	ch := (C.int)(height)
 	C.SetWindowSize(cw, ch)
 }
 
@@ -432,10 +432,10 @@ func GetMonitorName(monitor int) string {
 }
 
 // SetClipboardText - Set clipboard text content
-func SetClipboardText(data string) {
-	cdata := C.CString(data)
-	defer C.free(unsafe.Pointer(cdata))
-	C.SetClipboardText(cdata)
+func SetClipboardText(text string) {
+	ctext := C.CString(text)
+	defer C.free(unsafe.Pointer(ctext))
+	C.SetClipboardText(ctext)
 }
 
 // GetClipboardText - Get clipboard text content
@@ -492,7 +492,7 @@ func EndMode2D() {
 }
 
 // BeginMode3D - Initializes 3D mode for drawing (Camera setup)
-func BeginMode3D(camera Camera) {
+func BeginMode3D(camera Camera3D) {
 	ccamera := camera.cptr()
 	C.BeginMode3D(*ccamera)
 }
@@ -860,11 +860,11 @@ func ColorAlpha(col color.RGBA, alpha float32) color.RGBA {
 }
 
 // ColorAlphaBlend - Returns src alpha-blended into dst color with tint
-func ColorAlphaBlend(src, dst, tint color.RGBA) color.RGBA {
-	csrc := colorCptr(src)
+func ColorAlphaBlend(dst, src, tint color.RGBA) color.RGBA {
 	cdst := colorCptr(dst)
+	csrc := colorCptr(src)
 	ctint := colorCptr(tint)
-	ret := C.ColorAlphaBlend(*csrc, *cdst, *ctint)
+	ret := C.ColorAlphaBlend(*cdst, *csrc, *ctint)
 	v := newColorFromPointer(unsafe.Pointer(&ret))
 	return v
 }
@@ -884,6 +884,19 @@ func GetColor(hexValue uint) color.RGBA {
 	ret := C.GetColor(chexValue)
 	v := newColorFromPointer(unsafe.Pointer(&ret))
 	return v
+}
+
+// GetPixelColor - Get Color from a source pixel pointer of certain format
+func GetPixelColor(srcPtr unsafe.Pointer, format int32) color.RGBA {
+	ret := C.GetPixelColor(srcPtr, C.int(format))
+	v := newColorFromPointer(unsafe.Pointer(&ret))
+	return v
+}
+
+// SetPixelColor - Set color formatted into destination pixel pointer
+func SetPixelColor(dstPtr unsafe.Pointer, col color.RGBA, format int32) {
+	ccol := colorCptr(col)
+	C.SetPixelColor(dstPtr, *ccol, C.int(format))
 }
 
 // GetPixelDataSize - Get pixel data size in bytes for certain format
@@ -1031,6 +1044,15 @@ func GetKeyPressed() int32 {
 func GetCharPressed() int32 {
 	ret := C.GetCharPressed()
 	v := (int32)(ret)
+	return v
+}
+
+// GetKeyName - Get name of a QWERTY key on the current keyboard layout
+// (eg returns string 'q' for KEY_A on an AZERTY keyboard)
+func GetKeyName(key int32) string {
+	ckey := (C.int)(key)
+	ret := C.GetKeyName(ckey)
+	v := C.GoString(ret)
 	return v
 }
 

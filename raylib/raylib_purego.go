@@ -803,7 +803,7 @@ func SetWindowTitle(title string) {
 }
 
 // SetWindowPosition - Set window position on screen (only PLATFORM_DESKTOP)
-func SetWindowPosition(x int, y int) {
+func SetWindowPosition(x, y int) {
 	posX, posY := int32(x), int32(y)
 	setWindowPosition.Call(nil, &posX, &posY)
 }
@@ -1093,7 +1093,7 @@ func EndBlendMode() {
 }
 
 // BeginScissorMode - Begin scissor mode (define screen area for following drawing)
-func BeginScissorMode(x int32, y int32, width int32, height int32) {
+func BeginScissorMode(x, y, width, height int32) {
 	beginScissorMode.Call(nil, &x, &y, &width, &height)
 }
 
@@ -1501,28 +1501,28 @@ func GetGamepadName(gamepad int32) string {
 }
 
 // IsGamepadButtonPressed - Check if a gamepad button has been pressed once
-func IsGamepadButtonPressed(gamepad int32, button int32) bool {
+func IsGamepadButtonPressed(gamepad, button int32) bool {
 	var ret ffi.Arg
 	isGamepadButtonPressed.Call(&ret, &gamepad, &button)
 	return ret.Bool()
 }
 
 // IsGamepadButtonDown - Check if a gamepad button is being pressed
-func IsGamepadButtonDown(gamepad int32, button int32) bool {
+func IsGamepadButtonDown(gamepad, button int32) bool {
 	var ret ffi.Arg
 	isGamepadButtonDown.Call(&ret, &gamepad, &button)
 	return ret.Bool()
 }
 
 // IsGamepadButtonReleased - Check if a gamepad button has been released once
-func IsGamepadButtonReleased(gamepad int32, button int32) bool {
+func IsGamepadButtonReleased(gamepad, button int32) bool {
 	var ret ffi.Arg
 	isGamepadButtonReleased.Call(&ret, &gamepad, &button)
 	return ret.Bool()
 }
 
 // IsGamepadButtonUp - Check if a gamepad button is NOT being pressed
-func IsGamepadButtonUp(gamepad int32, button int32) bool {
+func IsGamepadButtonUp(gamepad, button int32) bool {
 	var ret ffi.Arg
 	isGamepadButtonUp.Call(&ret, &gamepad, &button)
 	return ret.Bool()
@@ -1543,7 +1543,7 @@ func GetGamepadAxisCount(gamepad int32) int32 {
 }
 
 // GetGamepadAxisMovement - Get axis movement value for a gamepad axis
-func GetGamepadAxisMovement(gamepad int32, axis int32) float32 {
+func GetGamepadAxisMovement(gamepad, axis int32) float32 {
 	var ret float32
 	getGamepadAxisMovement.Call(&ret, &gamepad, &axis)
 	return ret
@@ -1619,17 +1619,19 @@ func GetMouseDelta() Vector2 {
 }
 
 // SetMousePosition - Set mouse position XY
-func SetMousePosition(x int32, y int32) {
-	setMousePosition.Call(nil, &x, &y)
+func SetMousePosition(x, y int) {
+	posX, poxY := int32(x), int32(y)
+	setMousePosition.Call(nil, &posX, &poxY)
 }
 
 // SetMouseOffset - Set mouse offset
-func SetMouseOffset(offsetX int32, offsetY int32) {
-	setMouseOffset.Call(nil, &offsetX, &offsetY)
+func SetMouseOffset(offsetX, offsetY int) {
+	x, y := int32(offsetX), int32(offsetY)
+	setMouseOffset.Call(nil, &x, &y)
 }
 
 // SetMouseScale - Set mouse scaling
-func SetMouseScale(scaleX float32, scaleY float32) {
+func SetMouseScale(scaleX, scaleY float32) {
 	setMouseScale.Call(nil, &scaleX, &scaleY)
 }
 
@@ -1761,7 +1763,7 @@ func GetShapesTextureRectangle() Rectangle {
 }
 
 // DrawPixel - Draw a pixel
-func DrawPixel(posX int32, posY int32, col color.RGBA) {
+func DrawPixel(posX, posY int32, col color.RGBA) {
 	drawPixel.Call(nil, &posX, &posY, &col)
 }
 
@@ -1771,17 +1773,17 @@ func DrawPixelV(position Vector2, col color.RGBA) {
 }
 
 // DrawLine - Draw a line
-func DrawLine(startPosX int32, startPosY int32, endPosX int32, endPosY int32, col color.RGBA) {
+func DrawLine(startPosX, startPosY, endPosX, endPosY int32, col color.RGBA) {
 	drawLine.Call(nil, &startPosX, &startPosY, &endPosX, &endPosY, &col)
 }
 
 // DrawLineV - Draw a line (using gl lines)
-func DrawLineV(startPos Vector2, endPos Vector2, col color.RGBA) {
+func DrawLineV(startPos, endPos Vector2, col color.RGBA) {
 	drawLineV.Call(nil, &startPos, &endPos, &col)
 }
 
 // DrawLineEx - Draw a line (using triangles/quads)
-func DrawLineEx(startPos Vector2, endPos Vector2, thick float32, col color.RGBA) {
+func DrawLineEx(startPos, endPos Vector2, thick float32, col color.RGBA) {
 	drawLineEx.Call(nil, &startPos, &endPos, &thick, &col)
 }
 
@@ -1793,7 +1795,7 @@ func DrawLineStrip(points []Vector2, col color.RGBA) {
 }
 
 // DrawLineBezier - Draw line segment cubic-bezier in-out interpolation
-func DrawLineBezier(startPos Vector2, endPos Vector2, thick float32, col color.RGBA) {
+func DrawLineBezier(startPos, endPos Vector2, thick float32, col color.RGBA) {
 	drawLineBezier.Call(nil, &startPos, &endPos, &thick, &col)
 }
 
@@ -1803,7 +1805,7 @@ func DrawLineDashed(startPos, endPos Vector2, dashSize, spaceSize int32, col col
 }
 
 // DrawCircle - Draw a color-filled circle
-func DrawCircle(centerX int32, centerY int32, radius float32, col color.RGBA) {
+func DrawCircle(centerX, centerY int32, radius float32, col color.RGBA) {
 	drawCircle.Call(nil, &centerX, &centerY, &radius, &col)
 }
 
@@ -1813,22 +1815,22 @@ func DrawCircleV(center Vector2, radius float32, col color.RGBA) {
 }
 
 // DrawCircleGradient - Draw a gradient-filled circle
-func DrawCircleGradient(center Vector2, radius float32, inner color.RGBA, outer color.RGBA) {
+func DrawCircleGradient(center Vector2, radius float32, inner, outer color.RGBA) {
 	drawCircleGradient.Call(nil, &center, &radius, &inner, &outer)
 }
 
 // DrawCircleSector - Draw a piece of a circle
-func DrawCircleSector(center Vector2, radius float32, startAngle float32, endAngle float32, segments int32, col color.RGBA) {
+func DrawCircleSector(center Vector2, radius, startAngle, endAngle float32, segments int32, col color.RGBA) {
 	drawCircleSector.Call(nil, &center, &radius, &startAngle, &endAngle, &segments, &col)
 }
 
 // DrawCircleSectorLines - Draw circle sector outline
-func DrawCircleSectorLines(center Vector2, radius float32, startAngle float32, endAngle float32, segments int32, col color.RGBA) {
+func DrawCircleSectorLines(center Vector2, radius, startAngle, endAngle float32, segments int32, col color.RGBA) {
 	drawCircleSectorLines.Call(nil, &center, &radius, &startAngle, &endAngle, &segments, &col)
 }
 
 // DrawCircleLines - Draw circle outline
-func DrawCircleLines(centerX int32, centerY int32, radius float32, col color.RGBA) {
+func DrawCircleLines(centerX, centerY int32, radius float32, col color.RGBA) {
 	drawCircleLines.Call(nil, &centerX, &centerY, &radius, &col)
 }
 
@@ -1838,37 +1840,37 @@ func DrawCircleLinesV(center Vector2, radius float32, col color.RGBA) {
 }
 
 // DrawEllipse - Draw ellipse
-func DrawEllipse(centerX int32, centerY int32, radiusH float32, radiusV float32, col color.RGBA) {
+func DrawEllipse(centerX, centerY int32, radiusH, radiusV float32, col color.RGBA) {
 	drawEllipse.Call(nil, &centerX, &centerY, &radiusH, &radiusV, &col)
 }
 
 // DrawEllipseV - Draw ellipse (Vector version)
-func DrawEllipseV(center Vector2, radiusH float32, radiusV float32, col color.RGBA) {
+func DrawEllipseV(center Vector2, radiusH, radiusV float32, col color.RGBA) {
 	drawEllipseV.Call(nil, &center, &radiusH, &radiusV, &col)
 }
 
 // DrawEllipseLines - Draw ellipse outline
-func DrawEllipseLines(centerX int32, centerY int32, radiusH float32, radiusV float32, col color.RGBA) {
+func DrawEllipseLines(centerX, centerY int32, radiusH, radiusV float32, col color.RGBA) {
 	drawEllipseLines.Call(nil, &centerX, &centerY, &radiusH, &radiusV, &col)
 }
 
 // DrawEllipseLinesV - Draw ellipse outline (Vector version)
-func DrawEllipseLinesV(center Vector2, radiusH float32, radiusV float32, col color.RGBA) {
+func DrawEllipseLinesV(center Vector2, radiusH, radiusV float32, col color.RGBA) {
 	drawEllipseLinesV.Call(nil, &center, &radiusH, &radiusV, &col)
 }
 
 // DrawRing - Draw ring
-func DrawRing(center Vector2, innerRadius float32, outerRadius float32, startAngle float32, endAngle float32, segments int32, col color.RGBA) {
+func DrawRing(center Vector2, innerRadius, outerRadius, startAngle, endAngle float32, segments int32, col color.RGBA) {
 	drawRing.Call(nil, &center, &innerRadius, &outerRadius, &startAngle, &endAngle, &segments, &col)
 }
 
 // DrawRingLines - Draw ring outline
-func DrawRingLines(center Vector2, innerRadius float32, outerRadius float32, startAngle float32, endAngle float32, segments int32, col color.RGBA) {
+func DrawRingLines(center Vector2, innerRadius, outerRadius, startAngle, endAngle float32, segments int32, col color.RGBA) {
 	drawRingLines.Call(nil, &center, &innerRadius, &outerRadius, &startAngle, &endAngle, &segments, &col)
 }
 
 // DrawRectangle - Draw a color-filled rectangle
-func DrawRectangle(posX int32, posY int32, width int32, height int32, col color.RGBA) {
+func DrawRectangle(posX, posY, width, height int32, col color.RGBA) {
 	drawRectangle.Call(nil, &posX, &posY, &width, &height, &col)
 }
 
@@ -1888,22 +1890,22 @@ func DrawRectanglePro(rec Rectangle, origin Vector2, rotation float32, col color
 }
 
 // DrawRectangleGradientV - Draw a vertical-gradient-filled rectangle
-func DrawRectangleGradientV(posX int32, posY int32, width int32, height int32, top color.RGBA, bottom color.RGBA) {
+func DrawRectangleGradientV(posX, posY, width, height int32, top, bottom color.RGBA) {
 	drawRectangleGradientV.Call(nil, &posX, &posY, &width, &height, &top, &bottom)
 }
 
 // DrawRectangleGradientH - Draw a horizontal-gradient-filled rectangle
-func DrawRectangleGradientH(posX int32, posY int32, width int32, height int32, left color.RGBA, right color.RGBA) {
+func DrawRectangleGradientH(posX, posY, width, height int32, left, right color.RGBA) {
 	drawRectangleGradientH.Call(nil, &posX, &posY, &width, &height, &left, &right)
 }
 
 // DrawRectangleGradientEx - Draw a gradient-filled rectangle with custom vertex colors
-func DrawRectangleGradientEx(rec Rectangle, topLeft color.RGBA, bottomLeft color.RGBA, bottomRight, topRight color.RGBA) {
+func DrawRectangleGradientEx(rec Rectangle, topLeft, bottomLeft, bottomRight, topRight color.RGBA) {
 	drawRectangleGradientEx.Call(nil, &rec, &topLeft, &bottomLeft, &bottomRight, &topRight)
 }
 
 // DrawRectangleLines - Draw rectangle outline
-func DrawRectangleLines(posX int32, posY int32, width int32, height int32, col color.RGBA) {
+func DrawRectangleLines(posX, posY, width, height int32, col color.RGBA) {
 	drawRectangleLines.Call(nil, &posX, &posY, &width, &height, &col)
 }
 
@@ -1928,12 +1930,12 @@ func DrawRectangleRoundedLinesEx(rec Rectangle, roundness float32, segments int3
 }
 
 // DrawTriangle - Draw a color-filled triangle (vertex in counter-clockwise order!)
-func DrawTriangle(v1 Vector2, v2 Vector2, v3 Vector2, col color.RGBA) {
+func DrawTriangle(v1, v2, v3 Vector2, col color.RGBA) {
 	drawTriangle.Call(nil, &v1, &v2, &v3, &col)
 }
 
 // DrawTriangleLines - Draw triangle outline (vertex in counter-clockwise order!)
-func DrawTriangleLines(v1 Vector2, v2 Vector2, v3 Vector2, col color.RGBA) {
+func DrawTriangleLines(v1, v2, v3 Vector2, col color.RGBA) {
 	drawTriangleLines.Call(nil, &v1, &v2, &v3, &col)
 }
 
@@ -1952,12 +1954,12 @@ func DrawTriangleStrip(points []Vector2, col color.RGBA) {
 }
 
 // DrawPoly - Draw a regular polygon (Vector version)
-func DrawPoly(center Vector2, sides int32, radius float32, rotation float32, col color.RGBA) {
+func DrawPoly(center Vector2, sides int32, radius, rotation float32, col color.RGBA) {
 	drawPoly.Call(nil, &center, &sides, &radius, &rotation, &col)
 }
 
 // DrawPolyLines - Draw a polygon outline of n sides
-func DrawPolyLines(center Vector2, sides int32, radius float32, rotation float32, col color.RGBA) {
+func DrawPolyLines(center Vector2, sides int32, radius, rotation float32, col color.RGBA) {
 	drawPolyLines.Call(nil, &center, &sides, &radius, &rotation, &col)
 }
 
@@ -2002,27 +2004,27 @@ func DrawSplineBezierCubic(points []Vector2, thick float32, col color.RGBA) {
 }
 
 // DrawSplineSegmentLinear - Draw spline segment: Linear, 2 points
-func DrawSplineSegmentLinear(p1 Vector2, p2 Vector2, thick float32, col color.RGBA) {
+func DrawSplineSegmentLinear(p1, p2 Vector2, thick float32, col color.RGBA) {
 	drawSplineSegmentLinear.Call(nil, &p1, &p2, &thick, &col)
 }
 
 // DrawSplineSegmentBasis - Draw spline segment: B-Spline, 4 points
-func DrawSplineSegmentBasis(p1 Vector2, p2 Vector2, p3 Vector2, p4 Vector2, thick float32, col color.RGBA) {
+func DrawSplineSegmentBasis(p1, p2, p3, p4 Vector2, thick float32, col color.RGBA) {
 	drawSplineSegmentBasis.Call(nil, &p1, &p2, &p3, &p4, &thick, &col)
 }
 
 // DrawSplineSegmentCatmullRom - Draw spline segment: Catmull-Rom, 4 points
-func DrawSplineSegmentCatmullRom(p1 Vector2, p2 Vector2, p3 Vector2, p4 Vector2, thick float32, col color.RGBA) {
+func DrawSplineSegmentCatmullRom(p1, p2, p3, p4 Vector2, thick float32, col color.RGBA) {
 	drawSplineSegmentCatmullRom.Call(nil, &p1, &p2, &p3, &p4, &thick, &col)
 }
 
 // DrawSplineSegmentBezierQuadratic - Draw spline segment: Quadratic Bezier, 2 points, 1 control point
-func DrawSplineSegmentBezierQuadratic(p1 Vector2, c2 Vector2, p3 Vector2, thick float32, col color.RGBA) {
+func DrawSplineSegmentBezierQuadratic(p1, c2, p3 Vector2, thick float32, col color.RGBA) {
 	drawSplineSegmentBezierQuadratic.Call(nil, &p1, &c2, &p3, &thick, &col)
 }
 
 // DrawSplineSegmentBezierCubic - Draw spline segment: Cubic Bezier, 2 points, 2 control points
-func DrawSplineSegmentBezierCubic(p1 Vector2, c2 Vector2, c3 Vector2, p4 Vector2, thick float32, col color.RGBA) {
+func DrawSplineSegmentBezierCubic(p1, c2, c3, p4 Vector2, thick float32, col color.RGBA) {
 	drawSplineSegmentBezierCubic.Call(nil, &p1, &c2, &c3, &p4, &thick, &col)
 }
 
@@ -2062,7 +2064,7 @@ func GetSplinePointBezierCubic(p1 Vector2, c2 Vector2, c3 Vector2, p4 Vector2, t
 }
 
 // CheckCollisionRecs - Check collision between two rectangles
-func CheckCollisionRecs(rec1 Rectangle, rec2 Rectangle) bool {
+func CheckCollisionRecs(rec1, rec2 Rectangle) bool {
 	var ret ffi.Arg
 	checkCollisionRecs.Call(&ret, &rec1, &rec2)
 	return ret.Bool()
@@ -2104,14 +2106,14 @@ func CheckCollisionPointCircle(point Vector2, center Vector2, radius float32) bo
 }
 
 // CheckCollisionPointTriangle - Check if point is inside a triangle
-func CheckCollisionPointTriangle(point Vector2, p1 Vector2, p2 Vector2, p3 Vector2) bool {
+func CheckCollisionPointTriangle(point, p1, p2, p3 Vector2) bool {
 	var ret ffi.Arg
 	checkCollisionPointTriangle.Call(&ret, &point, &p1, &p2, &p3)
 	return ret.Bool()
 }
 
 // CheckCollisionPointLine - Check if point belongs to line created between two points [p1] and [p2] with defined margin in pixels [threshold]
-func CheckCollisionPointLine(point Vector2, p1 Vector2, p2 Vector2, threshold int32) bool {
+func CheckCollisionPointLine(point, p1, p2 Vector2, threshold int32) bool {
 	var ret ffi.Arg
 	checkCollisionPointLine.Call(&ret, &point, &p1, &p2, &threshold)
 	return ret.Bool()
@@ -2127,7 +2129,7 @@ func CheckCollisionPointPoly(point Vector2, points []Vector2) bool {
 }
 
 // CheckCollisionLines - Check the collision between two lines defined by two points each, returns collision point by reference
-func CheckCollisionLines(startPos1 Vector2, endPos1 Vector2, startPos2 Vector2, endPos2 Vector2, collisionPoint *Vector2) bool {
+func CheckCollisionLines(startPos1, endPos1, startPos2, endPos2 Vector2, collisionPoint *Vector2) bool {
 	var ret ffi.Arg
 	checkCollisionLines.Call(&ret, &startPos1, &endPos1, &startPos2, &endPos2, &collisionPoint)
 	return ret.Bool()
@@ -2370,7 +2372,7 @@ func ImageAlphaClear(image *Image, col color.RGBA, threshold float32) {
 }
 
 // ImageAlphaMask - Apply alpha mask to image
-func ImageAlphaMask(image *Image, alphaMask *Image) {
+func ImageAlphaMask(image, alphaMask *Image) {
 	imageAlphaMask.Call(nil, &image, alphaMask)
 }
 
@@ -2392,17 +2394,17 @@ func ImageKernelConvolution(image *Image, kernel []float32) {
 }
 
 // ImageResize - Resize image (Bicubic scaling algorithm)
-func ImageResize(image *Image, newWidth int32, newHeight int32) {
+func ImageResize(image *Image, newWidth, newHeight int32) {
 	imageResize.Call(nil, &image, &newWidth, &newHeight)
 }
 
 // ImageResizeNN - Resize image (Nearest-Neighbor scaling algorithm)
-func ImageResizeNN(image *Image, newWidth int32, newHeight int32) {
+func ImageResizeNN(image *Image, newWidth, newHeight int32) {
 	imageResizeNN.Call(nil, &image, &newWidth, &newHeight)
 }
 
 // ImageResizeCanvas - Resize canvas and fill with color
-func ImageResizeCanvas(image *Image, newWidth int32, newHeight int32, offsetX int32, offsetY int32, fill color.RGBA) {
+func ImageResizeCanvas(image *Image, newWidth, newHeight, offsetX, offsetY int32, fill color.RGBA) {
 	imageResizeCanvas.Call(nil, &image, &newWidth, &newHeight, &offsetX, &offsetY, &fill)
 }
 
@@ -2412,7 +2414,7 @@ func ImageMipmaps(image *Image) {
 }
 
 // ImageDither - Dither image data to 16bpp or lower (Floyd-Steinberg dithering)
-func ImageDither(image *Image, rBpp int32, gBpp int32, bBpp int32, aBpp int32) {
+func ImageDither(image *Image, rBpp, gBpp, bBpp, aBpp int32) {
 	imageDither.Call(nil, &image, &rBpp, &gBpp, &bBpp, &aBpp)
 }
 
@@ -2467,27 +2469,27 @@ func ImageColorBrightness(image *Image, brightness int32) {
 }
 
 // ImageColorReplace - Modify image color: replace color
-func ImageColorReplace(image *Image, col color.RGBA, replace color.RGBA) {
+func ImageColorReplace(image *Image, col, replace color.RGBA) {
 	imageColorReplace.Call(nil, &image, &col, &replace)
 }
 
 // LoadImageColors - Load color data from image as a Color array (RGBA - 32bit)
 //
 // NOTE: Memory allocated should be freed using UnloadImageColors()
-func LoadImageColors(image *Image) []color.RGBA {
+func LoadImageColors(img *Image) []color.RGBA {
 	var ret *color.RGBA
-	loadImageColors.Call(&ret, image)
-	return unsafe.Slice(ret, image.Width*image.Height)
+	loadImageColors.Call(&ret, img)
+	return unsafe.Slice(ret, img.Width*img.Height)
 }
 
 // LoadImagePalette - Load colors palette from image as a Color array (RGBA - 32bit)
 //
 // NOTE: Memory allocated should be freed using UnloadImagePalette()
-func LoadImagePalette(image Image, maxPaletteSize int32) []color.RGBA {
+func LoadImagePalette(img Image, maxPaletteSize int32) []color.RGBA {
 	var colorCount int32
 	colorCountPtr := &colorCount
 	var ret *color.RGBA
-	loadImagePalette.Call(&ret, &image, &maxPaletteSize, &colorCountPtr)
+	loadImagePalette.Call(&ret, &img, &maxPaletteSize, &colorCountPtr)
 	return unsafe.Slice(ret, colorCount)
 }
 
@@ -2511,7 +2513,7 @@ func GetImageAlphaBorder(image Image, threshold float32) Rectangle {
 }
 
 // GetImageColor - Get image pixel color at (x, y) position
-func GetImageColor(image Image, x int32, y int32) color.RGBA {
+func GetImageColor(image Image, x, y int32) color.RGBA {
 	var ret color.RGBA
 	getImageColor.Call(&ret, &image, &x, &y)
 	return ret
@@ -2523,7 +2525,7 @@ func ImageClearBackground(dst *Image, col color.RGBA) {
 }
 
 // ImageDrawPixel - Draw pixel within an image
-func ImageDrawPixel(dst *Image, posX int32, posY int32, col color.RGBA) {
+func ImageDrawPixel(dst *Image, posX, posY int32, col color.RGBA) {
 	imageDrawPixel.Call(nil, &dst, &posX, &posY, &col)
 }
 
@@ -2533,7 +2535,7 @@ func ImageDrawPixelV(dst *Image, position Vector2, col color.RGBA) {
 }
 
 // ImageDrawLine - Draw line within an image
-func ImageDrawLine(dst *Image, startPosX int32, startPosY int32, endPosX int32, endPosY int32, col color.RGBA) {
+func ImageDrawLine(dst *Image, startPosX, startPosY, endPosX, endPosY int32, col color.RGBA) {
 	imageDrawLine.Call(nil, &dst, &startPosX, &startPosY, &endPosX, &endPosY, &col)
 }
 
@@ -2548,7 +2550,7 @@ func ImageDrawLineEx(dst *Image, start, end Vector2, thick int32, col color.RGBA
 }
 
 // ImageDrawCircle - Draw a filled circle within an image
-func ImageDrawCircle(dst *Image, centerX int32, centerY int32, radius int32, col color.RGBA) {
+func ImageDrawCircle(dst *Image, centerX, centerY, radius int32, col color.RGBA) {
 	imageDrawCircle.Call(nil, &dst, &centerX, &centerY, &radius, &col)
 }
 
@@ -2558,7 +2560,7 @@ func ImageDrawCircleV(dst *Image, center Vector2, radius int32, col color.RGBA) 
 }
 
 // ImageDrawCircleLines - Draw circle outline within an image
-func ImageDrawCircleLines(dst *Image, centerX int32, centerY int32, radius int32, col color.RGBA) {
+func ImageDrawCircleLines(dst *Image, centerX, centerY, radius int32, col color.RGBA) {
 	imageDrawCircleLines.Call(nil, &dst, &centerX, &centerY, &radius, &col)
 }
 
@@ -2568,12 +2570,12 @@ func ImageDrawCircleLinesV(dst *Image, center Vector2, radius int32, col color.R
 }
 
 // ImageDrawRectangle - Draw rectangle within an image
-func ImageDrawRectangle(dst *Image, posX int32, posY int32, width int32, height int32, col color.RGBA) {
+func ImageDrawRectangle(dst *Image, posX, posY, width, height int32, col color.RGBA) {
 	imageDrawRectangle.Call(nil, &dst, &posX, &posY, &width, &height, &col)
 }
 
 // ImageDrawRectangleV - Draw rectangle within an image (Vector version)
-func ImageDrawRectangleV(dst *Image, position Vector2, size Vector2, col color.RGBA) {
+func ImageDrawRectangleV(dst *Image, position, size Vector2, col color.RGBA) {
 	imageDrawRectangleV.Call(nil, &dst, &position, &size, &col)
 }
 
@@ -2618,18 +2620,18 @@ func ImageDrawTriangleStrip(dst *Image, points []Vector2, col color.RGBA) {
 }
 
 // ImageDraw - Draw a source image within a destination image (tint applied to source)
-func ImageDraw(dst *Image, src *Image, srcRec Rectangle, dstRec Rectangle, tint color.RGBA) {
+func ImageDraw(dst, src *Image, srcRec, dstRec Rectangle, tint color.RGBA) {
 	imageDraw.Call(nil, &dst, src, &srcRec, &dstRec, &tint)
 }
 
 // ImageDrawText - Draw text (using default font) within an image (destination)
-func ImageDrawText(dst *Image, posX int32, posY int32, text string, fontSize int32, col color.RGBA) {
+func ImageDrawText(dst *Image, posX, posY int32, text string, fontSize int32, col color.RGBA) {
 	textPtr := convert.ToBytePtr(text)
 	imageDrawText.Call(nil, &dst, &textPtr, &posX, &posY, &fontSize, &col)
 }
 
 // ImageDrawTextEx - Draw text (custom sprite font) within an image (destination)
-func ImageDrawTextEx(dst *Image, position Vector2, font Font, text string, fontSize float32, spacing float32, tint color.RGBA) {
+func ImageDrawTextEx(dst *Image, position Vector2, font Font, text string, fontSize, spacing float32, tint color.RGBA) {
 	textPtr := convert.ToBytePtr(text)
 	imageDrawTextEx.Call(nil, &dst, &font, &textPtr, &position, &fontSize, &spacing, &tint)
 }
@@ -2741,7 +2743,7 @@ func DrawTextureV(texture Texture2D, position Vector2, tint color.RGBA) {
 }
 
 // DrawTextureEx - Draw a Texture2D with extended parameters
-func DrawTextureEx(texture Texture2D, position Vector2, rotation float32, scale float32, tint color.RGBA) {
+func DrawTextureEx(texture Texture2D, position Vector2, rotation, scale float32, tint color.RGBA) {
 	drawTextureEx.Call(nil, &texture, &position, &rotation, &scale, &tint)
 }
 
@@ -2751,7 +2753,7 @@ func DrawTextureRec(texture Texture2D, source Rectangle, position Vector2, tint 
 }
 
 // DrawTexturePro - Draw a part of a texture defined by a rectangle with 'pro' parameters
-func DrawTexturePro(texture Texture2D, source Rectangle, dest Rectangle, origin Vector2, rotation float32, tint color.RGBA) {
+func DrawTexturePro(texture Texture2D, source, dest Rectangle, origin Vector2, rotation float32, tint color.RGBA) {
 	drawTexturePro.Call(nil, &texture, &source, &dest, &origin, &rotation, &tint)
 }
 
@@ -2796,7 +2798,7 @@ func ColorToHSV(col color.RGBA) Vector3 {
 }
 
 // ColorFromHSV - Get a Color from HSV values, hue [0..360], saturation/value [0..1]
-func ColorFromHSV(hue float32, saturation float32, value float32) color.RGBA {
+func ColorFromHSV(hue, saturation, value float32) color.RGBA {
 	var ret color.RGBA
 	colorFromHSV.Call(&ret, &hue, &saturation, &value)
 	return ret
@@ -2831,7 +2833,7 @@ func ColorAlpha(col color.RGBA, alpha float32) color.RGBA {
 }
 
 // ColorAlphaBlend - Get src alpha-blended into dst color with tint
-func ColorAlphaBlend(dst color.RGBA, src color.RGBA, tint color.RGBA) color.RGBA {
+func ColorAlphaBlend(dst, src, tint color.RGBA) color.RGBA {
 	var ret color.RGBA
 	colorAlphaBlend.Call(&ret, &dst, &src, &tint)
 	return ret
@@ -2864,7 +2866,7 @@ func SetPixelColor(dstPtr unsafe.Pointer, col color.RGBA, format int32) {
 }
 
 // GetPixelDataSize - Get pixel data size in bytes for certain format
-func GetPixelDataSize(width int32, height int32, format int32) int32 {
+func GetPixelDataSize(width, height, format int32) int32 {
 	var ret ffi.Arg
 	getPixelDataSize.Call(&ret, &width, &height, &format)
 	return int32(ret)
@@ -2990,7 +2992,7 @@ func DrawTextEx(font Font, text string, position Vector2, fontSize float32, spac
 }
 
 // DrawTextPro - Draw text using Font and pro parameters (rotation)
-func DrawTextPro(font Font, text string, position Vector2, origin Vector2, rotation float32, fontSize float32, spacing float32, tint color.RGBA) {
+func DrawTextPro(font Font, text string, position, origin Vector2, rotation, fontSize, spacing float32, tint color.RGBA) {
 	textPtr := convert.ToBytePtr(text)
 	drawTextPro.Call(nil, &font, &textPtr, &position, &origin, &rotation, &fontSize, &spacing, &tint)
 }
@@ -3142,12 +3144,12 @@ func DrawCylinderWiresEx(startPos Vector3, endPos Vector3, startRadius float32, 
 }
 
 // DrawCapsule - Draw a capsule with the center of its sphere caps at startPos and endPos
-func DrawCapsule(startPos Vector3, endPos Vector3, radius float32, slices int32, rings int32, col color.RGBA) {
+func DrawCapsule(startPos, endPos Vector3, radius float32, slices, rings int32, col color.RGBA) {
 	drawCapsule.Call(nil, &startPos, &endPos, &radius, &slices, &rings, &col)
 }
 
 // DrawCapsuleWires - Draw capsule wireframe with the center of its sphere caps at startPos and endPos
-func DrawCapsuleWires(startPos Vector3, endPos Vector3, radius float32, slices int32, rings int32, col color.RGBA) {
+func DrawCapsuleWires(startPos, endPos Vector3, radius float32, slices, rings int32, col color.RGBA) {
 	drawCapsuleWires.Call(nil, &startPos, &endPos, &radius, &slices, &rings, &col)
 }
 

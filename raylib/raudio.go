@@ -63,7 +63,7 @@ func internalAudioStreamCallbackGo(data unsafe.Pointer, frames C.int) {
 	}
 }
 
-func AttachAudioMixedProcessor(callback AudioCallback) {
+func AttachAudioMixedProcessor(processor AudioCallback) {
 	audioMixedProcessorsMutex.Lock()
 	defer audioMixedProcessorsMutex.Unlock()
 
@@ -71,14 +71,14 @@ func AttachAudioMixedProcessor(callback AudioCallback) {
 		C.setAudioMixedProcessorCallbackWrapper()
 	}
 
-	audioMixedProcessors = append(audioMixedProcessors, callback)
+	audioMixedProcessors = append(audioMixedProcessors, processor)
 }
 
-func DetachAudioMixedProcessor(callback AudioCallback) {
+func DetachAudioMixedProcessor(processor AudioCallback) {
 	audioMixedProcessorsMutex.Lock()
 	defer audioMixedProcessorsMutex.Unlock()
 
-	callbackPtr := reflect.ValueOf(callback).Pointer()
+	callbackPtr := reflect.ValueOf(processor).Pointer()
 	for i := len(audioMixedProcessors) - 1; i >= 0; i-- {
 		if reflect.ValueOf(audioMixedProcessors[i]).Pointer() == callbackPtr {
 			audioMixedProcessors = append(audioMixedProcessors[:i], audioMixedProcessors[i+1:]...)
@@ -249,12 +249,14 @@ func UnloadSoundAlias(sound Sound) {
 	C.UnloadSoundAlias(*csound)
 }
 
-// ExportWave - Export wave data to file
-func ExportWave(wave Wave, fileName string) {
+// ExportWave - Export wave data to file, returns true on success
+func ExportWave(wave Wave, fileName string) bool {
 	cwave := wave.cptr()
 	cfileName := C.CString(fileName)
 	defer C.free(unsafe.Pointer(cfileName))
-	C.ExportWave(*cwave, cfileName)
+	ret := C.ExportWave(*cwave, cfileName)
+	v := bool(ret)
+	return v
 }
 
 // PlaySound - Play a sound

@@ -172,7 +172,7 @@ func DrawTextEx(font Font, text string, position Vector2, fontSize float32, spac
 }
 
 // DrawTextPro - Draw text using Font and pro parameters (rotation)
-func DrawTextPro(font Font, text string, position Vector2, origin Vector2, rotation, fontSize float32, spacing float32, tint color.RGBA) {
+func DrawTextPro(font Font, text string, position, origin Vector2, rotation, fontSize, spacing float32, tint color.RGBA) {
 	cfont := font.cptr()
 	ctext := C.CString(text)
 	defer C.free(unsafe.Pointer(ctext))
@@ -214,7 +214,7 @@ func MeasureTextEx(font Font, text string, fontSize float32, spacing float32) Ve
 }
 
 // GetGlyphIndex - Get glyph index position in font for a codepoint (unicode character), fallback to '?' if not found
-func GetGlyphIndex(font Font, codepoint int32) int32 {
+func GetGlyphIndex(font Font, codepoint rune) int32 {
 	cfont := font.cptr()
 	ccodepoint := (C.int)(codepoint)
 	ret := C.GetGlyphIndex(*cfont, ccodepoint)

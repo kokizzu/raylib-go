@@ -972,7 +972,7 @@ func SetUniformSampler(locIndex int32, textureId uint32) {
 
 // SetShader - Set shader currently active (id and locations)
 func SetShader(id uint32, locs *int32) {
-	rlSetShader.Call(&id, &locs)
+	rlSetShader.Call(nil, &id, &locs)
 }
 
 // ComputeShaderDispatch - Dispatch compute shader (equivalent to *draw* for graphics pilepine)

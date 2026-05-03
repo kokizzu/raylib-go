@@ -175,6 +175,15 @@ func DrawEllipse(centerX, centerY int32, radiusH, radiusV float32, col color.RGB
 	C.DrawEllipse(ccenterX, ccenterY, cradiusH, cradiusV, *ccolor)
 }
 
+// DrawEllipseV - Draw ellipse (Vector version)
+func DrawEllipseV(center Vector2, radiusH, radiusV float32, col color.RGBA) {
+	ccenter := center.cptr()
+	cradiusH := (C.float)(radiusH)
+	cradiusV := (C.float)(radiusV)
+	ccolor := colorCptr(col)
+	C.DrawEllipseV(*ccenter, cradiusH, cradiusV, *ccolor)
+}
+
 // DrawEllipseLines - Draw ellipse outline
 func DrawEllipseLines(centerX, centerY int32, radiusH, radiusV float32, col color.RGBA) {
 	ccenterX := (C.int)(centerX)
@@ -183,6 +192,15 @@ func DrawEllipseLines(centerX, centerY int32, radiusH, radiusV float32, col colo
 	cradiusV := (C.float)(radiusV)
 	ccolor := colorCptr(col)
 	C.DrawEllipseLines(ccenterX, ccenterY, cradiusH, cradiusV, *ccolor)
+}
+
+// DrawEllipseLinesV - Draw ellipse outline (Vector version)
+func DrawEllipseLinesV(center Vector2, radiusH, radiusV float32, col color.RGBA) {
+	ccenter := center.cptr()
+	cradiusH := (C.float)(radiusH)
+	cradiusV := (C.float)(radiusV)
+	ccolor := colorCptr(col)
+	C.DrawEllipseLinesV(*ccenter, cradiusH, cradiusV, *ccolor)
 }
 
 // DrawRing - Draw ring
@@ -266,13 +284,13 @@ func DrawRectangleGradientH(posX, posY, width, height int32, left, right color.R
 }
 
 // DrawRectangleGradientEx - Draw a gradient-filled rectangle with custom vertex colors
-func DrawRectangleGradientEx(rec Rectangle, topLeft, bottomLeft, topRight, bottomRight color.RGBA) {
+func DrawRectangleGradientEx(rec Rectangle, topLeft, bottomLeft, bottomRight, topRight color.RGBA) {
 	crec := rec.cptr()
 	ctopLeft := colorCptr(topLeft)
 	cbottomLeft := colorCptr(bottomLeft)
 	ctopRight := colorCptr(topRight)
 	cbottomRight := colorCptr(bottomRight)
-	C.DrawRectangleGradientEx(*crec, *ctopLeft, *cbottomLeft, *ctopRight, *cbottomRight)
+	C.DrawRectangleGradientEx(*crec, *ctopLeft, *cbottomLeft, *cbottomRight, *ctopRight)
 }
 
 // DrawRectangleLines - Draw rectangle outline
@@ -463,24 +481,24 @@ func DrawSplineSegmentCatmullRom(p1, p2, p3, p4 Vector2, thick float32, col colo
 }
 
 // DrawSplineSegmentBezierQuadratic - Draw spline segment: Quadratic Bezier, 2 points, 1 control point
-func DrawSplineSegmentBezierQuadratic(p1, p2, p3 Vector2, thick float32, col color.RGBA) {
+func DrawSplineSegmentBezierQuadratic(p1, c2, p3 Vector2, thick float32, col color.RGBA) {
 	cp1 := p1.cptr()
-	cp2 := p2.cptr()
+	cc2 := c2.cptr()
 	cp3 := p3.cptr()
 	cthick := (C.float)(thick)
 	ccolor := colorCptr(col)
-	C.DrawSplineSegmentBezierQuadratic(*cp1, *cp2, *cp3, cthick, *ccolor)
+	C.DrawSplineSegmentBezierQuadratic(*cp1, *cc2, *cp3, cthick, *ccolor)
 }
 
 // DrawSplineSegmentBezierCubic - Draw spline segment: Cubic Bezier, 2 points, 2 control points
-func DrawSplineSegmentBezierCubic(p1, p2, p3, p4 Vector2, thick float32, col color.RGBA) {
+func DrawSplineSegmentBezierCubic(p1, c2, c3, p4 Vector2, thick float32, col color.RGBA) {
 	cp1 := p1.cptr()
-	cp2 := p2.cptr()
-	cp3 := p3.cptr()
+	cc2 := c2.cptr()
+	cc3 := c3.cptr()
 	cp4 := p4.cptr()
 	cthick := (C.float)(thick)
 	ccolor := colorCptr(col)
-	C.DrawSplineSegmentBezierCubic(*cp1, *cp2, *cp3, *cp4, cthick, *ccolor)
+	C.DrawSplineSegmentBezierCubic(*cp1, *cc2, *cc3, *cp4, cthick, *ccolor)
 }
 
 // GetSplinePointLinear - Get (evaluate) spline point: Linear
@@ -624,13 +642,13 @@ func CheckCollisionPointPoly(point Vector2, points []Vector2) bool {
 }
 
 // CheckCollisionLines - Check the collision between two lines defined by two points each, returns collision point by reference
-func CheckCollisionLines(startPos1, endPos1, startPos2, endPos2 Vector2, point *Vector2) bool {
+func CheckCollisionLines(startPos1, endPos1, startPos2, endPos2 Vector2, collisionPoint *Vector2) bool {
 	cstartPos1 := startPos1.cptr()
 	cendPos1 := endPos1.cptr()
 	cstartPos2 := startPos2.cptr()
 	cendPos2 := endPos2.cptr()
-	cpoint := point.cptr()
-	ret := C.CheckCollisionLines(*cstartPos1, *cendPos1, *cstartPos2, *cendPos2, cpoint)
+	ccollisionPoint := collisionPoint.cptr()
+	ret := C.CheckCollisionLines(*cstartPos1, *cendPos1, *cstartPos2, *cendPos2, ccollisionPoint)
 	v := bool(ret)
 	return v
 }

@@ -235,6 +235,16 @@ func LoadImageColors(img *Image) []color.RGBA {
 	return (*[1 << 24]color.RGBA)(unsafe.Pointer(ret))[0 : img.Width*img.Height]
 }
 
+// LoadImagePalette - Load colors palette from image as a Color array (RGBA - 32bit)
+//
+// NOTE: Memory allocated should be freed using UnloadImagePalette()
+func LoadImagePalette(img Image, maxPaletteSize int32) []color.RGBA {
+	var colorCount C.int
+	cimg := img.cptr()
+	ret := C.LoadImagePalette(*cimg, C.int(maxPaletteSize), &colorCount)
+	return unsafe.Slice((*color.RGBA)(unsafe.Pointer(ret)), colorCount)
+}
+
 // UnloadImageColors - Unload color data loaded with LoadImageColors()
 func UnloadImageColors(cols []color.RGBA) {
 	C.UnloadImageColors((*C.Color)(unsafe.Pointer(&cols[0])))
@@ -357,10 +367,10 @@ func ImageFormat(image *Image, newFormat PixelFormat) {
 }
 
 // ImageToPOT - Convert image to POT (power-of-two)
-func ImageToPOT(image *Image, fillColor color.RGBA) {
+func ImageToPOT(image *Image, fill color.RGBA) {
 	cimage := image.cptr()
-	cfillColor := colorCptr(fillColor)
-	C.ImageToPOT(cimage, *cfillColor)
+	cfill := colorCptr(fill)
+	C.ImageToPOT(cimage, *cfill)
 }
 
 // ImageCrop - Crop an image to a defined rectangle
@@ -429,13 +439,13 @@ func ImageResizeNN(image *Image, newWidth, newHeight int32) {
 }
 
 // ImageResizeCanvas - Resize canvas and fill with color
-func ImageResizeCanvas(image *Image, newWidth, newHeight, offsetX, offsetY int32, col color.RGBA) {
+func ImageResizeCanvas(image *Image, newWidth, newHeight, offsetX, offsetY int32, fill color.RGBA) {
 	cimage := image.cptr()
 	cnewWidth := (C.int)(newWidth)
 	cnewHeight := (C.int)(newHeight)
 	coffsetX := (C.int)(offsetX)
 	coffsetY := (C.int)(offsetY)
-	ccolor := colorCptr(col)
+	ccolor := colorCptr(fill)
 	C.ImageResizeCanvas(cimage, cnewWidth, cnewHeight, coffsetX, coffsetY, *ccolor)
 }
 
@@ -641,14 +651,14 @@ func ImageDrawPixelV(dst *Image, position Vector2, col color.RGBA) {
 }
 
 // ImageDrawRectangle - Draw rectangle within an image
-func ImageDrawRectangle(dst *Image, x, y, width, height int32, col color.RGBA) {
+func ImageDrawRectangle(dst *Image, posX, posY, width, height int32, col color.RGBA) {
 	cdst := dst.cptr()
-	cx := (C.int)(x)
-	cy := (C.int)(y)
+	cposX := (C.int)(posX)
+	cposY := (C.int)(posY)
 	cwidth := (C.int)(width)
 	cheight := (C.int)(height)
 	ccolor := colorCptr(col)
-	C.ImageDrawRectangle(cdst, cx, cy, cwidth, cheight, *ccolor)
+	C.ImageDrawRectangle(cdst, cposX, cposY, cwidth, cheight, *ccolor)
 }
 
 // ImageDrawRectangleV - Draw rectangle within an image (Vector version)
@@ -740,7 +750,7 @@ func ImageDrawText(dst *Image, posX, posY int32, text string, fontSize int32, co
 }
 
 // ImageDrawTextEx - Draw text (custom sprite font) within an image (destination)
-func ImageDrawTextEx(dst *Image, position Vector2, font Font, text string, fontSize, spacing float32, col color.RGBA) {
+func ImageDrawTextEx(dst *Image, position Vector2, font Font, text string, fontSize, spacing float32, tint color.RGBA) {
 	cdst := dst.cptr()
 	cposition := position.cptr()
 	cfont := font.cptr()
@@ -748,8 +758,8 @@ func ImageDrawTextEx(dst *Image, position Vector2, font Font, text string, fontS
 	defer C.free(unsafe.Pointer(ctext))
 	cfontSize := (C.float)(fontSize)
 	cspacing := (C.float)(spacing)
-	ccolor := colorCptr(col)
-	C.ImageDrawTextEx(cdst, *cfont, ctext, *cposition, cfontSize, cspacing, *ccolor)
+	ctint := colorCptr(tint)
+	C.ImageDrawTextEx(cdst, *cfont, ctext, *cposition, cfontSize, cspacing, *ctint)
 }
 
 // GenImageColor - Generate image: plain color
@@ -870,17 +880,17 @@ func GenTextureMipmaps(texture *Texture2D) {
 }
 
 // SetTextureFilter - Set texture scaling filter mode
-func SetTextureFilter(texture Texture2D, filterMode TextureFilterMode) {
+func SetTextureFilter(texture Texture2D, filter TextureFilterMode) {
 	ctexture := texture.cptr()
-	cfilterMode := (C.int)(filterMode)
-	C.SetTextureFilter(*ctexture, cfilterMode)
+	cfilter := (C.int)(filter)
+	C.SetTextureFilter(*ctexture, cfilter)
 }
 
 // SetTextureWrap - Set texture wrapping mode
-func SetTextureWrap(texture Texture2D, wrapMode TextureWrapMode) {
+func SetTextureWrap(texture Texture2D, wrap TextureWrapMode) {
 	ctexture := texture.cptr()
-	cwrapMode := (C.int)(wrapMode)
-	C.SetTextureWrap(*ctexture, cwrapMode)
+	cwrap := (C.int)(wrap)
+	C.SetTextureWrap(*ctexture, cwrap)
 }
 
 // DrawTexture - Draw a Texture2D
@@ -911,23 +921,23 @@ func DrawTextureEx(texture Texture2D, position Vector2, rotation, scale float32,
 }
 
 // DrawTextureRec - Draw a part of a texture defined by a rectangle
-func DrawTextureRec(texture Texture2D, sourceRec Rectangle, position Vector2, tint color.RGBA) {
+func DrawTextureRec(texture Texture2D, source Rectangle, position Vector2, tint color.RGBA) {
 	ctexture := texture.cptr()
-	csourceRec := sourceRec.cptr()
+	csource := source.cptr()
 	cposition := position.cptr()
 	ctint := colorCptr(tint)
-	C.DrawTextureRec(*ctexture, *csourceRec, *cposition, *ctint)
+	C.DrawTextureRec(*ctexture, *csource, *cposition, *ctint)
 }
 
 // DrawTexturePro - Draw a part of a texture defined by a rectangle with 'pro' parameters
-func DrawTexturePro(texture Texture2D, sourceRec, destRec Rectangle, origin Vector2, rotation float32, tint color.RGBA) {
+func DrawTexturePro(texture Texture2D, source, dest Rectangle, origin Vector2, rotation float32, tint color.RGBA) {
 	ctexture := texture.cptr()
-	csourceRec := sourceRec.cptr()
-	cdestRec := destRec.cptr()
+	csource := source.cptr()
+	cdest := dest.cptr()
 	corigin := origin.cptr()
 	crotation := (C.float)(rotation)
 	ctint := colorCptr(tint)
-	C.DrawTexturePro(*ctexture, *csourceRec, *cdestRec, *corigin, crotation, *ctint)
+	C.DrawTexturePro(*ctexture, *csource, *cdest, *corigin, crotation, *ctint)
 }
 
 // cptr returns C pointer
