@@ -331,26 +331,6 @@ func DrawModelWiresEx(model Model, position Vector3, rotationAxis Vector3, rotat
 	C.DrawModelWiresEx(*cmodel, *cposition, *crotationAxis, crotationAngle, *cscale, *ctint)
 }
 
-// DrawModelPoints - Draw a model as points
-func DrawModelPoints(model Model, position Vector3, scale float32, tint color.RGBA) {
-	cmodel := model.cptr()
-	cposition := position.cptr()
-	cscale := (C.float)(scale)
-	ctint := colorCptr(tint)
-	C.DrawModelPoints(*cmodel, *cposition, cscale, *ctint)
-}
-
-// DrawModelPointsEx - Draw a model as points with extended parameters
-func DrawModelPointsEx(model Model, position Vector3, rotationAxis Vector3, rotationAngle float32, scale Vector3, tint color.RGBA) {
-	cmodel := model.cptr()
-	cposition := position.cptr()
-	crotationAxis := rotationAxis.cptr()
-	crotationAngle := (C.float)(rotationAngle)
-	cscale := scale.cptr()
-	ctint := colorCptr(tint)
-	C.DrawModelPointsEx(*cmodel, *cposition, *crotationAxis, crotationAngle, *cscale, *ctint)
-}
-
 // DrawBoundingBox - Draw bounding box (wires)
 func DrawBoundingBox(box BoundingBox, col color.RGBA) {
 	cbox := box.cptr()
@@ -606,25 +586,11 @@ func LoadModelAnimations(fileName string) []ModelAnimation {
 }
 
 // UpdateModelAnimation - Update model animation pose (CPU)
-func UpdateModelAnimation(model Model, anim ModelAnimation, frame int32) {
+func UpdateModelAnimation(model Model, anim ModelAnimation, frame float32) {
 	cmodel := model.cptr()
 	canim := anim.cptr()
-	cframe := (C.int)(frame)
+	cframe := (C.float)(frame)
 	C.UpdateModelAnimation(*cmodel, *canim, cframe)
-}
-
-// UpdateModelAnimationBones - Update model animation mesh bone matrices (GPU skinning)
-func UpdateModelAnimationBones(model Model, anim ModelAnimation, frame int32) {
-	cmodel := model.cptr()
-	canim := anim.cptr()
-	cframe := (C.int)(frame)
-	C.UpdateModelAnimationBones(*cmodel, *canim, cframe)
-}
-
-// UnloadModelAnimation - Unload animation data
-func UnloadModelAnimation(anim ModelAnimation) {
-	canim := anim.cptr()
-	C.UnloadModelAnimation(*canim)
 }
 
 // UnloadModelAnimations - Unload animation array data

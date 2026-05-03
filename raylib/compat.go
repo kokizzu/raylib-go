@@ -56,9 +56,9 @@ func UploadMesh(mesh *Mesh, dynamic bool) {
 	if mesh.AnimNormals != nil {
 		pinner.Pin(mesh.AnimNormals)
 	}
-	if mesh.BoneIds != nil {
-		pinner.Pin(mesh.BoneIds)
-	}
+	// if mesh.BoneIds != nil {
+	// 	pinner.Pin(mesh.BoneIds)
+	// }
 	if mesh.BoneWeights != nil {
 		pinner.Pin(mesh.BoneWeights)
 	}
