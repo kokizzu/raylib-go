@@ -269,10 +269,10 @@ func LoadModel(fileName string) Model {
 	return v
 }
 
-// LoadModelFromMesh - Load model from mesh data
-func LoadModelFromMesh(data Mesh) Model {
-	cdata := data.cptr()
-	ret := C.LoadModelFromMesh(*cdata)
+// LoadModelFromMesh - Load model from generated mesh (default material)
+func LoadModelFromMesh(mesh Mesh) Model {
+	cmesh := mesh.cptr()
+	ret := C.LoadModelFromMesh(*cmesh)
 	v := newModelFromPointer(unsafe.Pointer(&ret))
 	return v
 }
@@ -535,11 +535,11 @@ func GenMeshHeightmap(heightmap Image, size Vector3) Mesh {
 }
 
 // GenMeshCubicmap - Generate cubes-based map mesh from image data
-func GenMeshCubicmap(cubicmap Image, size Vector3) Mesh {
+func GenMeshCubicmap(cubicmap Image, cubeSize Vector3) Mesh {
 	ccubicmap := cubicmap.cptr()
-	csize := size.cptr()
+	ccubeSize := cubeSize.cptr()
 
-	ret := C.GenMeshCubicmap(*ccubicmap, *csize)
+	ret := C.GenMeshCubicmap(*ccubicmap, *ccubeSize)
 	v := newMeshFromPointer(unsafe.Pointer(&ret))
 	return v
 }

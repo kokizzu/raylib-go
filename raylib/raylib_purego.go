@@ -2029,35 +2029,35 @@ func DrawSplineSegmentBezierCubic(p1, c2, c3, p4 Vector2, thick float32, col col
 }
 
 // GetSplinePointLinear - Get (evaluate) spline point: Linear
-func GetSplinePointLinear(startPos Vector2, endPos Vector2, t float32) Vector2 {
+func GetSplinePointLinear(startPos, endPos Vector2, t float32) Vector2 {
 	var ret Vector2
 	getSplinePointLinear.Call(&ret, &startPos, &endPos, &t)
 	return ret
 }
 
 // GetSplinePointBasis - Get (evaluate) spline point: B-Spline
-func GetSplinePointBasis(p1 Vector2, p2 Vector2, p3 Vector2, p4 Vector2, t float32) Vector2 {
+func GetSplinePointBasis(p1, p2, p3, p4 Vector2, t float32) Vector2 {
 	var ret Vector2
 	getSplinePointBasis.Call(&ret, &p1, &p2, &p3, &p4, &t)
 	return ret
 }
 
 // GetSplinePointCatmullRom - Get (evaluate) spline point: Catmull-Rom
-func GetSplinePointCatmullRom(p1 Vector2, p2 Vector2, p3 Vector2, p4 Vector2, t float32) Vector2 {
+func GetSplinePointCatmullRom(p1, p2, p3, p4 Vector2, t float32) Vector2 {
 	var ret Vector2
 	getSplinePointCatmullRom.Call(&ret, &p1, &p2, &p3, &p4, &t)
 	return ret
 }
 
 // GetSplinePointBezierQuad - Get (evaluate) spline point: Quadratic Bezier
-func GetSplinePointBezierQuad(p1 Vector2, c2 Vector2, p3 Vector2, t float32) Vector2 {
+func GetSplinePointBezierQuad(p1, c2, p3 Vector2, t float32) Vector2 {
 	var ret Vector2
 	getSplinePointBezierQuad.Call(&ret, &p1, &c2, &p3, &t)
 	return ret
 }
 
 // GetSplinePointBezierCubic - Get (evaluate) spline point: Cubic Bezier
-func GetSplinePointBezierCubic(p1 Vector2, c2 Vector2, c3 Vector2, p4 Vector2, t float32) Vector2 {
+func GetSplinePointBezierCubic(p1, c2, c3, p4 Vector2, t float32) Vector2 {
 	var ret Vector2
 	getSplinePointBezierCubic.Call(&ret, &p1, &c2, &c3, &p4, &t)
 	return ret
@@ -2136,7 +2136,7 @@ func CheckCollisionLines(startPos1, endPos1, startPos2, endPos2 Vector2, collisi
 }
 
 // GetCollisionRec - Get collision rectangle for two rectangles collision
-func GetCollisionRec(rec1 Rectangle, rec2 Rectangle) Rectangle {
+func GetCollisionRec(rec1, rec2 Rectangle) Rectangle {
 	var ret Rectangle
 	getCollisionRec.Call(&ret, &rec1, &rec2)
 	return ret
@@ -2151,7 +2151,7 @@ func LoadImage(fileName string) *Image {
 }
 
 // LoadImageRaw - Load image from RAW file data
-func LoadImageRaw(fileName string, width int32, height int32, format PixelFormat, headerSize int32) *Image {
+func LoadImageRaw(fileName string, width, height int32, format PixelFormat, headerSize int32) *Image {
 	var ret Image
 	fileNamePtr := convert.ToBytePtr(fileName)
 	loadImageRaw.Call(&ret, &fileNamePtr, &width, &height, &format, &headerSize)
@@ -2238,7 +2238,7 @@ func ExportImageToMemory(image Image, fileType string) []byte {
 }
 
 // GenImageColor - Generate image: plain color
-func GenImageColor(width int, height int, col color.RGBA) *Image {
+func GenImageColor(width, height int, col color.RGBA) *Image {
 	var ret Image
 	w, h := int32(width), int32(height)
 	genImageColor.Call(&ret, &w, &h, &col)
@@ -2246,7 +2246,7 @@ func GenImageColor(width int, height int, col color.RGBA) *Image {
 }
 
 // GenImageGradientLinear - Generate image: linear gradient, direction in degrees [0..360], 0=Vertical gradient
-func GenImageGradientLinear(width int, height int, direction int, start color.RGBA, end color.RGBA) *Image {
+func GenImageGradientLinear(width, height, direction int, start, end color.RGBA) *Image {
 	var ret Image
 	w, h, dir := int32(width), int32(height), int32(direction)
 	genImageGradientLinear.Call(&ret, &w, &h, &dir, &start, &end)
@@ -2254,7 +2254,7 @@ func GenImageGradientLinear(width int, height int, direction int, start color.RG
 }
 
 // GenImageGradientRadial - Generate image: radial gradient
-func GenImageGradientRadial(width int, height int, density float32, inner color.RGBA, outer color.RGBA) *Image {
+func GenImageGradientRadial(width, height int, density float32, inner, outer color.RGBA) *Image {
 	var ret Image
 	w, h := int32(width), int32(height)
 	genImageGradientRadial.Call(&ret, &w, &h, &density, &inner, &outer)
@@ -2262,7 +2262,7 @@ func GenImageGradientRadial(width int, height int, density float32, inner color.
 }
 
 // GenImageGradientSquare - Generate image: square gradient
-func GenImageGradientSquare(width int, height int, density float32, inner color.RGBA, outer color.RGBA) *Image {
+func GenImageGradientSquare(width, height int, density float32, inner, outer color.RGBA) *Image {
 	var ret Image
 	w, h := int32(width), int32(height)
 	genImageGradientSquare.Call(&ret, &w, &h, &density, &inner, &outer)
@@ -2270,7 +2270,7 @@ func GenImageGradientSquare(width int, height int, density float32, inner color.
 }
 
 // GenImageChecked - Generate image: checked
-func GenImageChecked(width int, height int, checksX int, checksY int, col1 color.RGBA, col2 color.RGBA) *Image {
+func GenImageChecked(width, height, checksX, checksY int, col1, col2 color.RGBA) *Image {
 	var ret Image
 	w, h, cX, cY := int32(width), int32(height), int32(checksX), int32(checksY)
 	genImageChecked.Call(&ret, &w, &h, &cX, &cY, &col1, &col2)
@@ -2278,7 +2278,7 @@ func GenImageChecked(width int, height int, checksX int, checksY int, col1 color
 }
 
 // GenImageWhiteNoise - Generate image: white noise
-func GenImageWhiteNoise(width int, height int, factor float32) *Image {
+func GenImageWhiteNoise(width, height int, factor float32) *Image {
 	var ret Image
 	w, h := int32(width), int32(height)
 	genImageWhiteNoise.Call(&ret, &w, &h, &factor)
@@ -2294,7 +2294,7 @@ func GenImagePerlinNoise(width, height, offsetX, offsetY int, scale float32) *Im
 }
 
 // GenImageCellular - Generate image: cellular algorithm, bigger tileSize means bigger cells
-func GenImageCellular(width int, height int, tileSize int) *Image {
+func GenImageCellular(width, height, tileSize int) *Image {
 	var ret Image
 	w, h, tS := int32(width), int32(height), int32(tileSize)
 	genImageCellular.Call(&ret, &w, &h, &tS)
@@ -2302,7 +2302,7 @@ func GenImageCellular(width int, height int, tileSize int) *Image {
 }
 
 // GenImageText - Generate image: grayscale image from text data
-func GenImageText(width int, height int, text string) *Image {
+func GenImageText(width, height int, text string) *Image {
 	var ret Image
 	w, h, textPtr := int32(width), int32(height), convert.ToBytePtr(text)
 	genImageText.Call(&ret, &w, &h, &textPtr)
@@ -2331,19 +2331,19 @@ func ImageFromChannel(image Image, selectedChannel int32) Image {
 }
 
 // ImageText - Create an image from text (default font)
-func ImageText(text string, fontSize int32, col color.RGBA) Image {
+func ImageText(text string, fontSize int32, col color.RGBA) *Image {
 	var ret Image
 	textPtr := convert.ToBytePtr(text)
 	imageText.Call(&ret, &textPtr, &fontSize, &col)
-	return ret
+	return &ret
 }
 
 // ImageTextEx - Create an image from text (custom sprite font)
-func ImageTextEx(font Font, text string, fontSize float32, spacing float32, tint color.RGBA) Image {
+func ImageTextEx(font Font, text string, fontSize, spacing float32, tint color.RGBA) *Image {
 	var ret Image
 	textPtr := convert.ToBytePtr(text)
 	imageTextEx.Call(&ret, &font, &textPtr, &fontSize, &spacing, &tint)
-	return ret
+	return &ret
 }
 
 // ImageFormat - Convert image data to desired format
@@ -2659,7 +2659,7 @@ func LoadTextureCubemap(image *Image, layout int32) Texture2D {
 }
 
 // LoadRenderTexture - Load texture for rendering (framebuffer)
-func LoadRenderTexture(width int32, height int32) RenderTexture2D {
+func LoadRenderTexture(width, height int32) RenderTexture2D {
 	var ret RenderTexture2D
 	loadRenderTexture.Call(&ret, &width, &height)
 	return ret
@@ -3302,7 +3302,7 @@ func GenMeshPoly(sides int, radius float32) Mesh {
 }
 
 // GenMeshPlane - Generate plane mesh (with subdivisions)
-func GenMeshPlane(width float32, length float32, resX int, resZ int) Mesh {
+func GenMeshPlane(width, length float32, resX, resZ int) Mesh {
 	var ret Mesh
 	x, z := int32(resX), int32(resZ)
 	genMeshPlane.Call(&ret, &width, &length, &x, &z)
@@ -3310,14 +3310,14 @@ func GenMeshPlane(width float32, length float32, resX int, resZ int) Mesh {
 }
 
 // GenMeshCube - Generate cuboid mesh
-func GenMeshCube(width float32, height float32, length float32) Mesh {
+func GenMeshCube(width, height, length float32) Mesh {
 	var ret Mesh
 	genMeshCube.Call(&ret, &width, &height, &length)
 	return ret
 }
 
 // GenMeshSphere - Generate sphere mesh (standard sphere)
-func GenMeshSphere(radius float32, rings int, slices int) Mesh {
+func GenMeshSphere(radius float32, rings, slices int) Mesh {
 	var ret Mesh
 	r, s := int32(rings), int32(slices)
 	genMeshSphere.Call(&ret, &radius, &r, &s)
@@ -3325,7 +3325,7 @@ func GenMeshSphere(radius float32, rings int, slices int) Mesh {
 }
 
 // GenMeshHemiSphere - Generate half-sphere mesh (no bottom cap)
-func GenMeshHemiSphere(radius float32, rings int, slices int) Mesh {
+func GenMeshHemiSphere(radius float32, rings, slices int) Mesh {
 	var ret Mesh
 	r, s := int32(rings), int32(slices)
 	genMeshHemiSphere.Call(&ret, &radius, &r, &s)
@@ -3333,7 +3333,7 @@ func GenMeshHemiSphere(radius float32, rings int, slices int) Mesh {
 }
 
 // GenMeshCylinder - Generate cylinder mesh
-func GenMeshCylinder(radius float32, height float32, slices int) Mesh {
+func GenMeshCylinder(radius, height float32, slices int) Mesh {
 	var ret Mesh
 	s := int32(slices)
 	genMeshCylinder.Call(&ret, &radius, &height, &s)
@@ -3341,7 +3341,7 @@ func GenMeshCylinder(radius float32, height float32, slices int) Mesh {
 }
 
 // GenMeshCone - Generate cone/pyramid mesh
-func GenMeshCone(radius float32, height float32, slices int) Mesh {
+func GenMeshCone(radius, height float32, slices int) Mesh {
 	var ret Mesh
 	s := int32(slices)
 	genMeshCone.Call(&ret, &radius, &height, &s)
@@ -3349,7 +3349,7 @@ func GenMeshCone(radius float32, height float32, slices int) Mesh {
 }
 
 // GenMeshTorus - Generate torus mesh
-func GenMeshTorus(radius float32, size float32, radSeg int, sides int) Mesh {
+func GenMeshTorus(radius, size float32, radSeg, sides int) Mesh {
 	var ret Mesh
 	r, s := int32(radSeg), int32(sides)
 	genMeshTorus.Call(&ret, &radius, &size, &r, &s)
@@ -3357,7 +3357,7 @@ func GenMeshTorus(radius float32, size float32, radSeg int, sides int) Mesh {
 }
 
 // GenMeshKnot - Generate trefoil knot mesh
-func GenMeshKnot(radius float32, size float32, radSeg int, sides int) Mesh {
+func GenMeshKnot(radius, size float32, radSeg, sides int) Mesh {
 	var ret Mesh
 	r, s := int32(radSeg), int32(sides)
 	genMeshKnot.Call(&ret, &radius, &size, &r, &s)
@@ -3494,14 +3494,14 @@ func GetRayCollisionMesh(ray Ray, mesh Mesh, transform Matrix) RayCollision {
 }
 
 // GetRayCollisionTriangle - Get collision info between ray and triangle
-func GetRayCollisionTriangle(ray Ray, p1 Vector3, p2 Vector3, p3 Vector3) RayCollision {
+func GetRayCollisionTriangle(ray Ray, p1, p2, p3 Vector3) RayCollision {
 	var ret RayCollision
 	getRayCollisionTriangle.Call(&ret, &ray, &p1, &p2, &p3)
 	return ret
 }
 
 // GetRayCollisionQuad - Get collision info between ray and quad
-func GetRayCollisionQuad(ray Ray, p1 Vector3, p2 Vector3, p3 Vector3, p4 Vector3) RayCollision {
+func GetRayCollisionQuad(ray Ray, p1, p2, p3, p4 Vector3) RayCollision {
 	var ret RayCollision
 	getRayCollisionQuad.Call(&ret, &ray, &p1, &p2, &p3, &p4)
 	return ret

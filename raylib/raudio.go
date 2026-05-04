@@ -360,12 +360,12 @@ func LoadMusicStream(fileName string) Music {
 }
 
 // LoadMusicStreamFromMemory - Load music stream from data
-func LoadMusicStreamFromMemory(fileType string, fileData []byte, dataSize int32) Music {
+func LoadMusicStreamFromMemory(fileType string, data []byte, dataSize int32) Music {
 	cfileType := C.CString(fileType)
 	defer C.free(unsafe.Pointer(cfileType))
-	cfileData := (*C.uchar)(unsafe.Pointer(&fileData[0]))
+	cdata := (*C.uchar)(unsafe.Pointer(&data[0]))
 	cdataSize := (C.int)(dataSize)
-	ret := C.LoadMusicStreamFromMemory(cfileType, cfileData, cdataSize)
+	ret := C.LoadMusicStreamFromMemory(cfileType, cdata, cdataSize)
 	v := newMusicFromPointer(unsafe.Pointer(&ret))
 	return v
 }

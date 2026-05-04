@@ -542,6 +542,15 @@ func ImageColorReplace(image *Image, col, replace color.RGBA) {
 	C.ImageColorReplace(cimage, *ccolor, *creplace)
 }
 
+// GetImageAlphaBorder - Get image alpha border rectangle
+func GetImageAlphaBorder(image Image, threshold float32) Rectangle {
+	cimage := image.cptr()
+	cthreshold := C.float(threshold)
+	ret := C.GetImageAlphaBorder(*cimage, cthreshold)
+	v := newRectangleFromPointer(unsafe.Pointer(&ret))
+	return v
+}
+
 // GetImageColor - Get image pixel color at (x, y) position
 func GetImageColor(image Image, x, y int32) color.RGBA {
 	cimage := image.cptr()

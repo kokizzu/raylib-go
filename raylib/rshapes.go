@@ -502,11 +502,11 @@ func DrawSplineSegmentBezierCubic(p1, c2, c3, p4 Vector2, thick float32, col col
 }
 
 // GetSplinePointLinear - Get (evaluate) spline point: Linear
-func GetSplinePointLinear(p1, p2 Vector2, t float32) Vector2 {
-	cp1 := p1.cptr()
-	cp2 := p2.cptr()
+func GetSplinePointLinear(startPos, endPos Vector2, t float32) Vector2 {
+	cstartPos := startPos.cptr()
+	cendPos := endPos.cptr()
 	ct := (C.float)(t)
-	ret := C.GetSplinePointLinear(*cp1, *cp2, ct)
+	ret := C.GetSplinePointLinear(*cstartPos, *cendPos, ct)
 	v := newVector2FromPointer(unsafe.Pointer(&ret))
 	return v
 }
@@ -536,24 +536,24 @@ func GetSplinePointCatmullRom(p1, p2, p3, p4 Vector2, t float32) Vector2 {
 }
 
 // GetSplinePointBezierQuad - Get (evaluate) spline point: Quadratic Bezier
-func GetSplinePointBezierQuad(p1, p2, p3 Vector2, t float32) Vector2 {
+func GetSplinePointBezierQuad(p1, c2, p3 Vector2, t float32) Vector2 {
 	cp1 := p1.cptr()
-	cp2 := p2.cptr()
+	cc2 := c2.cptr()
 	cp3 := p3.cptr()
 	ct := (C.float)(t)
-	ret := C.GetSplinePointBezierQuad(*cp1, *cp2, *cp3, ct)
+	ret := C.GetSplinePointBezierQuad(*cp1, *cc2, *cp3, ct)
 	v := newVector2FromPointer(unsafe.Pointer(&ret))
 	return v
 }
 
 // GetSplinePointBezierCubic - Get (evaluate) spline point: Cubic Bezier
-func GetSplinePointBezierCubic(p1, p2, p3, p4 Vector2, t float32) Vector2 {
+func GetSplinePointBezierCubic(p1, c2, c3, p4 Vector2, t float32) Vector2 {
 	cp1 := p1.cptr()
-	cp2 := p2.cptr()
-	cp3 := p3.cptr()
+	cc2 := c2.cptr()
+	cc3 := c3.cptr()
 	cp4 := p4.cptr()
 	ct := (C.float)(t)
-	ret := C.GetSplinePointBezierCubic(*cp1, *cp2, *cp3, *cp4, ct)
+	ret := C.GetSplinePointBezierCubic(*cp1, *cc2, *cc3, *cp4, ct)
 	v := newVector2FromPointer(unsafe.Pointer(&ret))
 	return v
 }
