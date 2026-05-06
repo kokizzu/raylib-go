@@ -55,7 +55,7 @@ var (
 	setWindowOpacity         = dll.MustPrep("SetWindowOpacity", &ffi.TypeVoid, &ffi.TypeFloat)
 	setWindowFocused         = dll.MustPrep("SetWindowFocused", &ffi.TypeVoid)
 	getWindowHandle          = dll.MustPrep("GetWindowHandle", &ffi.TypePointer)
-	getScreenWidth           = dll.MustPrep("GetWindowHandle", &ffi.TypeSint32)
+	getScreenWidth           = dll.MustPrep("GetScreenWidth", &ffi.TypeSint32)
 	getScreenHeight          = dll.MustPrep("GetScreenHeight", &ffi.TypeSint32)
 	getRenderWidth           = dll.MustPrep("GetRenderWidth", &ffi.TypeSint32)
 	getRenderHeight          = dll.MustPrep("GetRenderHeight", &ffi.TypeSint32)
