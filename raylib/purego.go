@@ -17,8 +17,6 @@ const (
 	requiredVersion = "6.0"
 )
 
-var libname string
-
 var vsprintf ffi.Fun
 
 func init() {
@@ -45,6 +43,8 @@ func init() {
 
 // loadLibrary loads the raylib shared library and panics on error
 func loadLibrary() ffi.Lib {
+	libname := extractLib()
+
 	if len(libname) == 0 {
 		switch runtime.GOOS {
 		case "freebsd", "linux":
