@@ -896,22 +896,24 @@ func TextBox(bounds rl.Rectangle, text *string, textSize int, editMode bool) boo
 	cbounds.height = C.float(bounds.Height)
 
 	bs := []byte(*text)
-	if len(bs) == 0 {
-		bs = []byte{byte(0)}
+	if len(bs) < textSize {
+		newBs := make([]byte, textSize)
+		copy(newBs, bs)
+		bs = newBs
 	}
-	if 0 < len(bs) && bs[len(bs)-1] != byte(0) { // minimalize allocation
-		bs = append(bs, byte(0)) // for next input symbols
-	}
-	ctext := (*C.char)(unsafe.Pointer(&bs[0]))
-	defer func() {
-		*text = strings.Trim(string(bs), "\x00")
-		// no need : C.free(unsafe.Pointer(ctext))
-	}()
+
+	// C.CString creates a copy of the Go string on the C heap.
+	// This avoids passing Go memory to C, completely eliminating heap corruption.
+	ctext := C.CString(string(bs))
+	defer C.free(unsafe.Pointer(ctext))
 
 	ctextSize := C.int(textSize)
 	ceditMode := C.bool(editMode)
 
-	return C.GuiTextBox(cbounds, ctext, ctextSize, ceditMode) != 0
+	result := C.GuiTextBox(cbounds, ctext, ctextSize, ceditMode) != 0
+
+	*text = C.GoString(ctext)
+	return result
 }
 
 // Spinner control, sets value to the selected number and returns true when clicked.
